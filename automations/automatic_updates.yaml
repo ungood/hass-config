@@ -1,0 +1,12 @@
+---
+alias: Automatic Updates
+id: b792fb1f2382432db2d67d66289a3c40
+triggers:
+  - trigger: time
+    at: 04:00:00
+actions:
+  - action: update.install
+    target:
+      entity_id: >-
+        {{ states.update | map(attribute='entity_id') |
+           select('is_state', 'on') | list }}

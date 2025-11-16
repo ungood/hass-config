@@ -1,0 +1,19 @@
+---
+name: Home Assistant Configuration Check
+
+"on":
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Home Assistant Configuration Check
+        uses: frenck/action-home-assistant@v1
+        with:
+          path: "."
