@@ -1,2 +1,19 @@
+# Secret files
+secrets.yaml
+
+# State files
+*.log
+*.log.*
+*.db*
+
+# Ignore directories
+custom_components/
+hacs/
+image/
+tts/
+www
+zigbee2mqtt/
+
+
 # Generated files
 .pre-commit-config.yaml
