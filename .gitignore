@@ -6,7 +6,9 @@ secrets.yaml
 *.log.*
 *.db*
 
-# Ignore directories
+# Ignored directories
+.cloud
+.storage
 custom_components/
 hacs/
 image/
