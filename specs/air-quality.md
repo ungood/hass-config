@@ -166,22 +166,18 @@ Two input boolean helpers must be created to track whether fans are in automatio
 
 ### Filter Change Tracking
 
-Each air filter fan should track runtime to alert when filter replacement is needed:
+Each air filter device already tracks runtime and provides a sensor indicating when the filter needs replacement.
 
 **Requirements:**
-- Track total runtime hours for each filter
-- Create a persistent notification when filter requires changing
-- Filter change threshold to be defined (e.g., after 720 hours / 30 days of runtime)
+- Monitor the filter replacement sensor from each device
+- Create a persistent notification when the sensor indicates filter change is needed
 - Notification should remain until dismissed by user
-- Runtime counter should reset when user dismisses the notification (indicating filter has been changed)
-
-**Implementation suggestion**: Use a counter helper or history stats sensor to track runtime
 
 ## Automation Summary
 
 ### Required Automations
 
-The system requires the following automations:
+The system requires the following automations.
 
 #### Air Quality Control
 
@@ -213,16 +209,16 @@ The system requires the following automations:
 #### Filter Maintenance
 
 6. **Upstairs Filter - Change Notification**
-   - Trigger: Upstairs filter runtime exceeds threshold (e.g., 720 hours)
+   - Trigger: Upstairs filter replacement sensor indicates filter needs changing
    - Condition: None
    - Action: Create persistent notification requesting filter change
 
 7. **Basement Filter - Change Notification**
-   - Trigger: Basement filter runtime exceeds threshold (e.g., 720 hours)
+   - Trigger: Basement filter replacement sensor indicates filter needs changing
    - Condition: None
    - Action: Create persistent notification requesting filter change
 
-**Note**: Each notification should include an action to dismiss and reset the runtime counter.
+**Note**: Each notification should include an action to dismiss and, if supported, reset/acknowledge the device's filter tracking.
 
 **Implementation Note**: To distinguish between automation-controlled and manually-controlled fans, use an input boolean helper for each fan (e.g., `input_boolean.upstairs_filter_auto_mode`). Set to `on` when automation turns on the fan, and to `off` when user manually controls it.
 
@@ -418,19 +414,18 @@ The system requires the following automations:
 
 ### Test 10: Filter Change Notification
 
-**Setup**: Filter runtime approaches or exceeds threshold
+**Setup**: Filter replacement sensor indicates filter needs changing
 
 **Procedure**:
-1. Ensure filter runtime tracking is working
-2. Allow filter to run until threshold is reached (or simulate runtime)
-3. Verify persistent notification is created
-4. Dismiss notification
-5. Verify runtime counter resets
+1. Wait for device's filter replacement sensor to trigger (or simulate sensor state change)
+2. Verify persistent notification is created
+3. Dismiss notification
+4. If device supports acknowledgment, verify device filter tracking is reset
 
 **Expected Result**:
-- Notification appears when runtime threshold is reached
+- Notification appears when device's filter replacement sensor triggers
 - Notification persists until dismissed
-- Runtime counter resets when notification is dismissed
+- Device filter tracking is acknowledged/reset if supported
 
 ## Future Enhancements
 
@@ -452,7 +447,7 @@ The implementation will be considered successful when:
 1. All seven automations are created and enabled
 2. Sleep schedule is defined and functional
 3. Input boolean helpers created to track automation vs manual control mode
-4. Filter runtime tracking is implemented for both filters
+4. Filter change notification automations respond to device sensors
 5. All test scenarios pass successfully
 6. Fans automatically turn on when air quality is poor (outside sleep hours)
 7. Fans automatically turn off when air quality improves (if they were turned on by automation)

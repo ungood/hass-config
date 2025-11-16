@@ -1,0 +1,47 @@
+---
+blueprint:
+  name: Air Filter Change Notification
+  description: >
+    Creates a persistent notification when an air filter needs to be replaced
+    based on the filter's replacement sensor.
+  domain: automation
+
+  input:
+    filter_name:
+      name: Filter Name
+      description: Name of the filter (for notification title)
+      selector:
+        text:
+      default: Air Filter
+
+    replace_filter_sensor:
+      name: Replace Filter Sensor
+      description: Binary sensor that indicates when filter needs replacement
+      selector:
+        entity:
+          domain: binary_sensor
+
+    filter_age_sensor:
+      name: Filter Age Sensor
+      description: Sensor that reports filter age in hours
+      selector:
+        entity:
+          domain: sensor
+
+triggers:
+  - trigger: state
+    entity_id: !input replace_filter_sensor
+    to: "on"
+
+actions:
+  - action: persistent_notification.create
+    data:
+      title: "{{ filter_name }} Needs Replacement"
+      message: >
+        The {{ filter_name | lower }} needs to be replaced.
+        Filter age: {{ states(filter_age_sensor) }} hours
+      notification_id: "{{ filter_name | lower | replace(' ', '_') }}_replacement"
+
+variables:
+  filter_name: !input filter_name
+  filter_age_sensor: !input filter_age_sensor

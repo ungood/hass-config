@@ -1,0 +1,166 @@
+---
+blueprint:
+  name: Air Quality Filter Control
+  description: >
+    Automatically controls an air filter based on air quality sensor readings.
+    Turns on when PM2.5, PM10, or VOC exceeds thresholds (1 min hysteresis).
+    Turns off when all metrics return to good levels (5 min hysteresis).
+    Respects sleep schedule and manual overrides.
+  domain: automation
+
+  input:
+    floor_name:
+      name: Floor Name
+      description: Name of the floor (for automation naming)
+      selector:
+        text:
+      default: Floor
+
+    pm2_5_sensor:
+      name: PM2.5 Sensor
+      description: Sensor that reports PM2.5 levels in ug/m3
+      selector:
+        entity:
+          domain: sensor
+
+    pm10_sensor:
+      name: PM10 Sensor
+      description: Sensor that reports PM10 levels in ug/m3
+      selector:
+        entity:
+          domain: sensor
+
+    voc_sensor:
+      name: VOC Index Sensor
+      description: Sensor that reports VOC index (0-500)
+      selector:
+        entity:
+          domain: sensor
+
+    air_filter:
+      name: Air Filter Fan
+      description: Fan entity to control
+      selector:
+        entity:
+          domain: fan
+
+    auto_mode_helper:
+      name: Auto Mode Helper
+      description: Input boolean to track if filter is automation-controlled
+      selector:
+        entity:
+          domain: input_boolean
+
+    sleep_schedule:
+      name: Sleep Schedule
+      description: Schedule entity that indicates sleep hours
+      selector:
+        entity:
+          domain: schedule
+      default: schedule.sleep_schedule
+
+mode: restart
+max_exceeded: silent
+
+triggers:
+  # Turn ON triggers - any metric exceeds threshold for 1 minute
+  - trigger: numeric_state
+    entity_id: !input pm2_5_sensor
+    above: 2.0
+    for:
+      minutes: 1
+    id: turn_on
+
+  - trigger: numeric_state
+    entity_id: !input pm10_sensor
+    above: 2.0
+    for:
+      minutes: 1
+    id: turn_on
+
+  - trigger: numeric_state
+    entity_id: !input voc_sensor
+    above: 100
+    for:
+      minutes: 1
+    id: turn_on
+
+  # Turn OFF triggers - all metrics below threshold for 5 minutes
+  - trigger: numeric_state
+    entity_id: !input pm2_5_sensor
+    below: 2.0
+    for:
+      minutes: 5
+    id: turn_off_pm2_5
+
+  - trigger: numeric_state
+    entity_id: !input pm10_sensor
+    below: 2.0
+    for:
+      minutes: 5
+    id: turn_off_pm10
+
+  - trigger: numeric_state
+    entity_id: !input voc_sensor
+    below: 100
+    for:
+      minutes: 5
+    id: turn_off_voc
+
+actions:
+  - choose:
+      # Handle TURN ON
+      - conditions:
+          - condition: trigger
+            id: turn_on
+          # Only outside sleep schedule
+          - condition: state
+            entity_id: !input sleep_schedule
+            state: "off"
+          # Don't turn on if already running
+          - condition: state
+            entity_id: !input air_filter
+            state: "off"
+        sequence:
+          - action: fan.turn_on
+            target:
+              entity_id: !input air_filter
+          - action: input_boolean.turn_on
+            target:
+              entity_id: !input auto_mode_helper
+
+      # Handle TURN OFF
+      - conditions:
+          - condition: or
+            conditions:
+              - condition: trigger
+                id: turn_off_pm2_5
+              - condition: trigger
+                id: turn_off_pm10
+              - condition: trigger
+                id: turn_off_voc
+          # All metrics must be below threshold
+          - condition: numeric_state
+            entity_id: !input pm2_5_sensor
+            below: 2.0
+          - condition: numeric_state
+            entity_id: !input pm10_sensor
+            below: 2.0
+          - condition: numeric_state
+            entity_id: !input voc_sensor
+            below: 100
+          # Filter must be running
+          - condition: state
+            entity_id: !input air_filter
+            state: "on"
+          # Only turn off if automation-controlled
+          - condition: state
+            entity_id: !input auto_mode_helper
+            state: "on"
+        sequence:
+          - action: fan.turn_off
+            target:
+              entity_id: !input air_filter
+          - action: input_boolean.turn_off
+            target:
+              entity_id: !input auto_mode_helper

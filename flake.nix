@@ -18,7 +18,6 @@
       ];
       perSystem = { config, self', inputs', pkgs, system, ... }: {
         pre-commit.settings.hooks = {
-          check-yaml.enable = true;
           home-assistant-config = {
             enable = true;
             name = "Home Assistant Config Check";

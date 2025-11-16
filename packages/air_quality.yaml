@@ -1,0 +1,88 @@
+---
+# Air Quality Management Feature
+# Controls air filters based on AirGradient sensor readings
+# See specs/air-quality.md for detailed specification
+
+input_boolean:
+  main_floor_filter_auto_mode:
+    name: "Main Floor Filter Auto Mode"
+    icon: mdi:air-filter
+
+  basement_filter_auto_mode:
+    name: "Basement Filter Auto Mode"
+    icon: mdi:air-filter
+
+automation:
+  # Main Floor Air Quality Control
+  - alias: Main Floor Air Quality Control
+    id: main_floor_air_quality_control
+    description: Controls main floor air filter based on air quality sensor readings
+    use_blueprint:
+      path: air_quality_filter_control.yaml
+      input:
+        floor_name: Main Floor
+        pm2_5_sensor: sensor.main_floor_air_sensor_pm2_5
+        pm10_sensor: sensor.main_floor_air_sensor_pm10
+        voc_sensor: sensor.main_floor_air_sensor_voc_index
+        air_filter: fan.main_floor_air_filter
+        auto_mode_helper: input_boolean.main_floor_filter_auto_mode
+        sleep_schedule: schedule.sleep_schedule
+
+  # Basement Air Quality Control
+  - alias: Basement Air Quality Control
+    id: basement_air_quality_control
+    description: Controls basement air filter based on air quality sensor readings
+    use_blueprint:
+      path: air_quality_filter_control.yaml
+      input:
+        floor_name: Basement
+        pm2_5_sensor: sensor.basement_air_sensor_pm2_5
+        pm10_sensor: sensor.basement_air_sensor_pm10
+        voc_sensor: sensor.basement_air_sensor_voc_index
+        air_filter: fan.basement_air_filter
+        auto_mode_helper: input_boolean.basement_filter_auto_mode
+        sleep_schedule: schedule.sleep_schedule
+
+  # Turn off all filters at sleep schedule
+  - alias: All Air Filters - Turn OFF at Sleep Schedule
+    id: air_filters_sleep_turnoff
+    description: Turn off all air filters when sleep schedule starts
+    triggers:
+      - trigger: state
+        entity_id: schedule.sleep_schedule
+        to: "on"
+    actions:
+      # Turn off both air filters
+      - action: fan.turn_off
+        target:
+          entity_id:
+            - fan.main_floor_air_filter
+            - fan.basement_air_filter
+      # Reset auto mode helpers since filters are now off
+      - action: input_boolean.turn_off
+        target:
+          entity_id:
+            - input_boolean.main_floor_filter_auto_mode
+            - input_boolean.basement_filter_auto_mode
+
+  # Main Floor Filter Change Notification
+  - alias: Main Floor Air Filter - Change Notification
+    id: main_floor_filter_change_notification
+    description: Notify when main floor air filter needs to be replaced
+    use_blueprint:
+      path: air_filter_change_notification.yaml
+      input:
+        filter_name: Main Floor Air Filter
+        replace_filter_sensor: binary_sensor.main_floor_air_filter_replace_filter
+        filter_age_sensor: sensor.main_floor_air_filter_filter_age
+
+  # Basement Filter Change Notification
+  - alias: Basement Air Filter - Change Notification
+    id: basement_filter_change_notification
+    description: Notify when basement air filter needs to be replaced
+    use_blueprint:
+      path: air_filter_change_notification.yaml
+      input:
+        filter_name: Basement Air Filter
+        replace_filter_sensor: binary_sensor.basement_air_filter_replace_filter
+        filter_age_sensor: sensor.basement_air_filter_filter_age
