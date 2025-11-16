@@ -19,6 +19,13 @@
       perSystem = { config, self', inputs', pkgs, system, ... }: {
         pre-commit.settings.hooks = {
           check-yaml.enable = true;
+          home-assistant-config = {
+            enable = true;
+            name = "Home Assistant Config Check";
+            entry = "./scripts/validate-config";
+            files = "\\.(yaml|yml)$";
+            pass_filenames = false;
+          };
         };
 
         # Development shell
@@ -26,6 +33,8 @@
           inherit (config.pre-commit) shellHook;
           packages = config.pre-commit.settings.enabledPackages ++ [
             pkgs.home-assistant-cli
+            pkgs.home-assistant
+            pkgs.docker
           ];
         };
       };
