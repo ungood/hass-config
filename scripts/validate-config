@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Read Home Assistant version
+version=$(cat "$CONFIG_DIR/.HA_VERSION")
+
+echo "Checking Home Assistant configuration (version $version)..."
+docker run --rm \
+  -v "$CONFIG_DIR":/config \
+  ghcr.io/home-assistant/home-assistant:$version \
+  python -m homeassistant --script check_config --config /config -i
