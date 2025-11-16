@@ -8,7 +8,6 @@ secrets.yaml
 
 # Ignored directories
 .cloud
-.storage
 custom_components/
 hacs/
 image/
