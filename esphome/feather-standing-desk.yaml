@@ -1,0 +1,204 @@
+substitutions:
+  # The desk height, bewlow which, it is considered to be "sitting".
+  sitting_threshold: "40.0"
+  sitting_too_long: "60" # in minutes
+
+esphome:
+  name: "feather-standing-desk"
+  friendly_name: Standing Desk
+  on_boot:
+    # This script is required to initialize the following sensors:
+    #    height_pct, height_min, height_max, position1 - position4
+    # You can skip this if you don't use those.
+    priority: 0 # when mostly everything else is done
+    then:
+      - sensor.duty_time.reset: sitting_time
+      - lambda: "id(desk).request_physical_limits();"
+      - delay: 0.1s # give controller a chance to handle the response before sending the next command
+      - lambda: "id(desk).request_limits();"
+      - delay: 0.1s
+      - lambda: "id(desk).request_settings();"
+      
+
+esp32:
+  board: adafruit_feather_esp32_v2
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  baud_rate: 0 # disable logging over uart, required when using the RX/TX pins for the controller
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: "e94b742b4b5fac604575d3403e620753"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/Rocka84/esphome_components/
+    components: [ jiecang_desk_controller ]
+
+light:
+  - platform: neopixelbus
+    id: neopixel
+    name: "NeoPixel"
+    type: GRB
+    variant: WS2812
+    pin: GPIO0
+    method:
+      type: esp32_rmt
+      channel: 0
+    num_leds: 1
+    restore_mode: RESTORE_AND_ON  
+    internal: True
+
+uart:
+  - id: desk_uart
+    baud_rate: 9600
+    rx_pin:
+      number: RX
+      ignore_pin_validation_error: true
+    tx_pin:
+      number: TX
+      ignore_pin_validation_error: true
+
+# see full example for more options: https://github.com/Rocka84/esphome_components/blob/master/components/jiecang_desk_controller/example_full.yaml
+jiecang_desk_controller:
+  id: desk
+  sensors:
+    height:
+      id: height
+      name: "Height"
+      icon: "mdi:human-male-height"
+    # height_min:
+    #   name: "Height Min"
+    # height_max:
+    #   name: "Height Max"
+    # height_pct:
+    #   name: "Height Percent"
+    # position1:
+    #   name: "Position 1"
+    # position2:
+    #   name: "Position 2"
+    # position3:
+    #   name: "Position 3"
+    # position4:
+    #   name: "Position 4"
+  buttons:
+    # move_up:
+    #   name: "Move up"
+    # move_down:
+    #   name: "Move down"
+    stop:
+      name: "Stop"
+      icon: "mdi:stop"
+    # step_up:
+    #   name: "Step up"
+    # step_down:
+    #   name: "Step down"
+    position1:
+      name: "Position 1"
+      icon: "mdi:numeric-1-box"
+    position2:
+      name: "Position 2"
+      icon: "mdi:numeric-2-box"
+    position3:
+      name: "Position 3"
+      icon: "mdi:numeric-3-box"
+    position4:
+      name: "Position 4"
+      icon: "mdi:numeric-4-box"
+    # save_position:
+    #   name: "Save Position"
+  # numbers:
+  #   height:
+  #     name: "Height"
+    # height_pct:
+    #   name: "Height Percent"
+
+
+# Measures if the desk is in "sitting" (true) or "standing" mode.
+binary_sensor:
+  - platform: analog_threshold
+    id: is_sitting
+    name: "Sitting"
+    sensor_id: height
+    icon: "mdi:human-male-height-variant"
+    threshold: ${sitting_threshold}
+    filters:
+      - invert
+    on_release:
+      then:
+        - sensor.duty_time.reset: sitting_time
+        - light.turn_off: neopixel
+    on_press: 
+      then:
+        - light.turn_on:
+            id: neopixel
+            brightness: 25%
+            red: 100%
+            green: 0%
+            blue: 0%
+  - platform: analog_threshold
+    id: sitting_too_long
+    name: "Sitting Too Long"
+    sensor_id: sitting_time
+    threshold: ${sitting_too_long}
+    internal: True
+    on_press: 
+      then:
+        - lambda: "id(desk).goto_position(1);"
+    
+        
+# Measures the amount of time the desk is in sitting mode.
+sensor:
+  - platform: duty_time
+    id: sitting_time
+    name: "Sitting Time"
+    sensor: is_sitting
+    accuracy_decimals: 0
+    internal: False
+    update_interval: 10s
+    unit_of_measurement: minutes
+    filters:
+      - lambda: return x / 60.0;
+
+
+## lambda usage
+# button:
+#   - platform: template
+#     name: "Step up"
+#     on_press:
+#       lambda: "id(my_desk).step_up();"
+#   - platform: template
+#     name: "Step down"
+#     on_press:
+#       lambda: "id(my_desk).step_down();"
+#   - platform: template
+#     name: "Stop"
+#     on_press:
+#       lambda: "id(my_desk).stop();"
+#   - platform: template
+#     name: "Position 2"
+#     on_press:
+#       lambda: "id(my_desk).goto_position(2);"
+#   - platform: template
+#     name: "Save Position 4"
+#     on_press:
+#       lambda: "id(my_desk).save_position(4);"
+#   - platform: template
+#     name: "Go to 100cm"
+#     on_press:
+#       lambda: "id(my_desk).goto_height(100);"
+
+
