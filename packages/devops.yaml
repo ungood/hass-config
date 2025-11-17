@@ -23,11 +23,6 @@ automation:
         local_only: false
 
     action:
-      - service: notify.persistent_notification
-        data:
-          title: "Configuration Deployment Started"
-          message: "Deploying configuration changes from commit: {{ states('sensor.ungood_home_assistant_latest_commit') }}"
-
       # Pull latest changes
       - service: shell_command.git_pull
 
@@ -43,12 +38,14 @@ automation:
           seconds: 2
 
       # Send success notification
-      - service: notify.persistent_notification
+      - service: notify.all_devices
         data:
           title: "Configuration Deployment Complete"
-          message: "Successfully deployed configuration changes from commit: {{ states('sensor.ungood_home_assistant_latest_commit') }}"
+          message: >-
+            Deployed commit {{ trigger.json.commit[:7] }} by {{ trigger.json.author }}:
+            {{ trigger.json.message }}
 
-  - id: b792fb1f2382432db2d67d66289a3c40
+  - id: automatic_updates
     alias: "Automatic Updates"
     description: "Automatically install available updates daily at 4 AM"
 

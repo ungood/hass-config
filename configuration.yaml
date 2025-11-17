@@ -15,6 +15,19 @@ bluetooth:
 frontend:
   themes: !include_dir_merge_named themes
 
+# Notification groups
+notify:
+  - name: all_devices
+    platform: group
+    services:
+      - service: persistent_notification
+      - service: mobile_app_jason_s_phone
+
+  - name: low_priority
+    platform: group
+    services:
+      - service: persistent_notification
+
 homeassistant:
   auth_providers:
     - type: homeassistant
