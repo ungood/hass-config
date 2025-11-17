@@ -29,6 +29,8 @@ jobs:
           COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -1)
 
           curl -X POST "${{ secrets.HOME_ASSISTANT_DEPLOY_WEBHOOK_URL }}" \
+            --fail \
+            --show-error \
             -H "Content-Type: application/json" \
             -d "$(jq -n \
               --arg commit "${{ github.sha }}" \
