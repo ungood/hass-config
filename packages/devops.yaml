@@ -1,0 +1,64 @@
+---
+# DevOps automation configuration
+# Handles automatic updates and configuration deployment
+
+shell_command:
+  # Pull latest changes from git repository
+  git_pull: 'cd /config && git pull origin main'
+
+  # Reload Home Assistant core configuration
+  reload_core_config: 'curl -X POST -H "Authorization: Bearer $SUPERVISOR_TOKEN" http://supervisor/core/api/services/homeassistant/reload_core_config'
+
+automation:
+  - id: auto_deploy_config
+    alias: "Deploy Configuration Updates"
+    description: "Automatically deploy configuration changes when GitHub Actions validation passes"
+
+    trigger:
+      # Triggered by webhook from GitHub Actions after successful validation
+      - platform: webhook
+        webhook_id: deploy_config
+        allowed_methods:
+          - POST
+        local_only: false
+
+    action:
+      - service: notify.persistent_notification
+        data:
+          title: "Configuration Deployment Started"
+          message: "Deploying configuration changes from commit: {{ states('sensor.ungood_home_assistant_latest_commit') }}"
+
+      # Pull latest changes
+      - service: shell_command.git_pull
+
+      # Wait a moment for the pull to complete
+      - delay:
+          seconds: 5
+
+      # Reload core configuration to apply changes
+      - service: homeassistant.reload_core_config
+
+      # Wait for reload to complete
+      - delay:
+          seconds: 2
+
+      # Send success notification
+      - service: notify.persistent_notification
+        data:
+          title: "Configuration Deployment Complete"
+          message: "Successfully deployed configuration changes from commit: {{ states('sensor.ungood_home_assistant_latest_commit') }}"
+
+  - id: b792fb1f2382432db2d67d66289a3c40
+    alias: "Automatic Updates"
+    description: "Automatically install available updates daily at 4 AM"
+
+    triggers:
+      - trigger: time
+        at: 04:00:00
+
+    actions:
+      - action: update.install
+        target:
+          entity_id: >-
+            {{ states.update | map(attribute='entity_id') |
+               select('is_state', 'on') | list }}
