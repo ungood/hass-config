@@ -42,8 +42,7 @@ automation:
         data:
           title: "Configuration Deployment Complete"
           message: >-
-            Deployed commit {{ trigger.json.commit[:7] }} by {{ trigger.json.author }}:
-            {{ trigger.json.message }}
+            Deployed commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
 
   - id: automatic_updates
     alias: "Automatic Updates"

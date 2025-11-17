@@ -25,11 +25,12 @@ jobs:
     steps:
       - name: Trigger Home Assistant Deployment
         run: |
+          # Extract first line of commit message only
+          COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -1)
+
           curl -X POST "${{ secrets.HOME_ASSISTANT_DEPLOY_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "commit": "${{ github.sha }}",
-              "message": "${{ github.event.head_commit.message }}",
-              "author": "${{ github.event.head_commit.author.name }}",
-              "repository": "${{ github.repository }}"
-            }'
+            -d "$(jq -n \
+              --arg commit "${{ github.sha }}" \
+              --arg message "$COMMIT_MESSAGE" \
+              '{commit: $commit, message: $message}')"
