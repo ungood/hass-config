@@ -4,7 +4,7 @@
 
 shell_command:
   # Pull latest changes from git repository
-  git_pull: 'cd /config && git pull origin main'
+  git_pull: 'git -C /config pull origin main'
 
 automation:
   - id: auto_deploy_config
@@ -20,11 +20,13 @@ automation:
         local_only: false
 
     action:
-      - try:
-          # Pull latest changes
-          - service: shell_command.git_pull
-            response_variable: git_response
+      # Pull latest changes
+      - service: shell_command.git_pull
+        response_variable: git_response
 
+      # Check if git pull succeeded
+      - if: "{{ git_response['returncode'] == 0 }}"
+        then:
           # Reload core configuration to apply changes
           - service: homeassistant.reload_all
 
@@ -34,13 +36,14 @@ automation:
               title: "Configuration Deployment Complete"
               message: >-
                 Deployed commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
-        error:
+        else:
           # Send failure notification
           - service: notify.all_devices
             data:
               title: "Configuration Deployment Failed"
               message: >-
                 Failed to deploy commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
+                Error: {{ git_response['stderr'] }}
 
   - id: automatic_updates
     alias: "Automatic Updates"
