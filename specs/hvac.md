@@ -1,0 +1,23 @@
+# HVAC package specification
+
+- In this house, there are 4 Daikin heat exchanger units
+    - 1 in each bedroom, 1 in the Living Room, and one in the Rec Room.
+    - The unit in the guest bedroom and living room are ceiling units which include an air filter.
+    - The units are controlled by faikout/faikin units over MQTT
+    - Each unit can be individually controlled, but all units that are on must be using the same mode:
+      - Auto
+      - Heat
+      - Cool
+      - Dry
+      - Fan
+- I want, in priority order:
+    - The fan to be used in the living room and guest bedroom if PM2.5 air quality is in the "Unhealthy" range.
+    - All units to be in auto mode if the house is vacant.
+    - Bedrooms to be cool during sleep hours.
+    - Living areas to be auto mode during waking hours.
+    - I would like the system to learn how long it takes to get to the desired temperature and start sleep/awake modes based on that temperature.
+- Additionally, I want to be able to configure, via inputs:
+    - Sleep hours
+    - Sleep temperature
+    - Awake temperature
+    - An overall on/off setting for this automation.
