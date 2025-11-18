@@ -1,0 +1,27 @@
+---
+# Communication and notification configuration
+
+script:
+  send_notification:
+    alias: "Send Notification"
+    description: "Send a custom notification to all devices"
+    fields:
+      title:
+        description: "Notification title"
+        example: "Test Notification"
+        required: false
+        default: "Test Notification"
+        selector:
+          text:
+      message:
+        description: "The message to send"
+        example: "This is a test notification"
+        required: true
+        selector:
+          text:
+            multiline: true
+    sequence:
+      - service: notify.all_devices
+        data:
+          title: "{{ title }}"
+          message: "{{ message }}"
