@@ -23,26 +23,34 @@ automation:
         local_only: false
 
     action:
-      # Pull latest changes
-      - service: shell_command.git_pull
+      - try:
+          # Pull latest changes
+          - service: shell_command.git_pull
 
-      # Wait a moment for the pull to complete
-      - delay:
-          seconds: 5
+          # Wait a moment for the pull to complete
+          - delay:
+              seconds: 5
 
-      # Reload core configuration to apply changes
-      - service: homeassistant.reload_core_config
+          # Reload core configuration to apply changes
+          - service: homeassistant.reload_core_config
 
-      # Wait for reload to complete
-      - delay:
-          seconds: 2
+          # Wait for reload to complete
+          - delay:
+              seconds: 2
 
-      # Send success notification
-      - service: notify.all_devices
-        data:
-          title: "Configuration Deployment Complete"
-          message: >-
-            Deployed commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
+          # Send success notification
+          - service: notify.all_devices
+            data:
+              title: "Configuration Deployment Complete"
+              message: >-
+                Deployed commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
+        error:
+          # Send failure notification
+          - service: notify.all_devices
+            data:
+              title: "Configuration Deployment Failed"
+              message: >-
+                Failed to deploy commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
 
   - id: automatic_updates
     alias: "Automatic Updates"
@@ -53,8 +61,15 @@ automation:
         at: 04:00:00
 
     actions:
-      - action: update.install
-        target:
-          entity_id: >-
-            {{ states.update | map(attribute='entity_id') |
-               select('is_state', 'on') | list }}
+      - try:
+          - action: update.install
+            target:
+              entity_id: >-
+                {{ states.update | map(attribute='entity_id') |
+                   select('is_state', 'on') | list }}
+        error:
+          # Send failure notification
+          - service: notify.low_priority
+            data:
+              title: "Automatic Updates Failed"
+              message: "Failed to install available updates"
