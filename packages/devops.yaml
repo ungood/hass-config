@@ -6,9 +6,6 @@ shell_command:
   # Pull latest changes from git repository
   git_pull: 'cd /config && git pull origin main'
 
-  # Reload Home Assistant core configuration
-  reload_core_config: 'curl -X POST -H "Authorization: Bearer $SUPERVISOR_TOKEN" http://supervisor/core/api/services/homeassistant/reload_core_config'
-
 automation:
   - id: auto_deploy_config
     alias: "Deploy Configuration Updates"
@@ -26,17 +23,10 @@ automation:
       - try:
           # Pull latest changes
           - service: shell_command.git_pull
-
-          # Wait a moment for the pull to complete
-          - delay:
-              seconds: 5
+            response_variable: git_response
 
           # Reload core configuration to apply changes
-          - service: homeassistant.reload_core_config
-
-          # Wait for reload to complete
-          - delay:
-              seconds: 2
+          - service: homeassistant.reload_all
 
           # Send success notification
           - service: notify.all_devices
