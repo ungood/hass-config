@@ -13,6 +13,7 @@ For development workflow, environment setup, and validation procedures, see [CON
 Query the running Home Assistant instance for entity IDs, state, and available services. Requires authentication (check `.env` for credentials).
 
 Common commands:
+
 ```bash
 # List all entities (useful for finding entity IDs)
 hass-cli entity list
@@ -28,6 +29,7 @@ hass-cli area list
 ```
 
 **Alternative**: If `hass-cli` is not working or authentication is unavailable, you can read registry information directly from JSON files in `.storage/`:
+
 - `.storage/core.area_registry` - Areas and their floor assignments
 - `.storage/core.floor_registry` - Floor definitions
 - `.storage/core.entity_registry` - Entity definitions and area assignments
@@ -36,6 +38,7 @@ hass-cli area list
 ### validate-config
 
 Validate Home Assistant configuration using Docker (same validation as CI):
+
 ```bash
 ./scripts/validate-config
 ```
@@ -43,6 +46,7 @@ Validate Home Assistant configuration using Docker (same validation as CI):
 ## Repository Overview
 
 This is a Home Assistant configuration repository that uses:
+
 - **Nix flakes** for development environment and dependency management
 - **GitHub Actions** for automated configuration validation
 - **Pre-commit hooks** for local validation

@@ -18,7 +18,6 @@ esphome:
       - lambda: "id(desk).request_limits();"
       - delay: 0.1s
       - lambda: "id(desk).request_settings();"
-      
 
 esp32:
   board: adafruit_feather_esp32_v2
@@ -46,7 +45,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/Rocka84/esphome_components/
-    components: [ jiecang_desk_controller ]
+    components: [jiecang_desk_controller]
 
 light:
   - platform: neopixelbus
@@ -59,7 +58,7 @@ light:
       type: esp32_rmt
       channel: 0
     num_leds: 1
-    restore_mode: RESTORE_AND_ON  
+    restore_mode: RESTORE_AND_ON
     internal: True
 
 uart:
@@ -123,9 +122,8 @@ jiecang_desk_controller:
   # numbers:
   #   height:
   #     name: "Height"
-    # height_pct:
-    #   name: "Height Percent"
-
+  # height_pct:
+  #   name: "Height Percent"
 
 # Measures if the desk is in "sitting" (true) or "standing" mode.
 binary_sensor:
@@ -141,7 +139,7 @@ binary_sensor:
       then:
         - sensor.duty_time.reset: sitting_time
         - light.turn_off: neopixel
-    on_press: 
+    on_press:
       then:
         - light.turn_on:
             id: neopixel
@@ -155,11 +153,10 @@ binary_sensor:
     sensor_id: sitting_time
     threshold: ${sitting_too_long}
     internal: True
-    on_press: 
+    on_press:
       then:
         - lambda: "id(desk).goto_position(1);"
-    
-        
+
 # Measures the amount of time the desk is in sitting mode.
 sensor:
   - platform: duty_time
@@ -172,8 +169,6 @@ sensor:
     unit_of_measurement: minutes
     filters:
       - lambda: return x / 60.0;
-
-
 ## lambda usage
 # button:
 #   - platform: template
@@ -200,5 +195,4 @@ sensor:
 #     name: "Go to 100cm"
 #     on_press:
 #       lambda: "id(my_desk).goto_height(100);"
-
 

@@ -7,7 +7,6 @@ blueprint:
     Turns off when all metrics return to good levels (5 min hysteresis).
     Respects sleep schedule and manual overrides.
   domain: automation
-
   input:
     floor_name:
       name: Floor Name

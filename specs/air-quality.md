@@ -27,6 +27,7 @@ Each floor has one AirGradient sensor providing real-time air quality metrics:
 - **Basement**: Located in basement covering rec room, laundry, and garage access
 
 **Sensor Capabilities:**
+
 - PM2.5 measurement (particulate matter ≤ 2.5 micrometers)
 - PM10 measurement (particulate matter ≤ 10 micrometers)
 - VOC Index (volatile organic compound index, scale 0-500)
@@ -40,6 +41,7 @@ Each floor has one dedicated air filter fan capable of removing PM2.5, PM10, and
 - **Basement filter**: Serves basement floor
 
 **Fan Capabilities:**
+
 - Binary control only (on/off, no variable speed control)
 - When enabled, operates at fixed speed until disabled
 - Can be manually controlled by user
@@ -49,11 +51,11 @@ Each floor has one dedicated air filter fan capable of removing PM2.5, PM10, and
 
 The system uses the following thresholds to determine when filtration is needed:
 
-| Metric | Threshold | Unit | Rationale |
-|--------|-----------|------|-----------|
-| PM2.5 | 2.0 | ug/m3 | WHO air quality guideline (24-hour mean: 15 ug/m3; keeping well below) |
-| PM10 | 2.0 | ug/m3 | Conservative threshold (WHO guideline: 45 ug/m3; keeping well below) |
-| VOC Index | 100 | index | Index value where air quality begins to degrade from "excellent" |
+| Metric    | Threshold | Unit  | Rationale                                                              |
+| --------- | --------- | ----- | ---------------------------------------------------------------------- |
+| PM2.5     | 2.0       | ug/m3 | WHO air quality guideline (24-hour mean: 15 ug/m3; keeping well below) |
+| PM10      | 2.0       | ug/m3 | Conservative threshold (WHO guideline: 45 ug/m3; keeping well below)   |
+| VOC Index | 100       | index | Index value where air quality begins to degrade from "excellent"       |
 
 ### Air Quality States
 
@@ -65,6 +67,7 @@ The system uses the following thresholds to determine when filtration is needed:
 ### Design Pattern
 
 The system uses **two independent automations per floor**:
+
 1. **Turn ON automation**: Triggers when air quality becomes poor
 2. **Turn OFF automation**: Triggers when air quality returns to good
 
@@ -73,6 +76,7 @@ This separation allows for different timing requirements (hysteresis) for each a
 ### Floor Independence
 
 Each floor operates completely independently:
+
 - Upstairs automation only monitors upstairs sensors and controls upstairs fan
 - Basement automation only monitors basement sensors and controls basement fan
 - No coordination between floors
@@ -82,11 +86,13 @@ Each floor operates completely independently:
 To prevent rapid on/off cycling:
 
 **Turn ON Behavior:**
+
 - Wait for ANY threshold to be exceeded for 1 minute continuously
 - If levels drop below threshold before 1 minute, cancel the turn-on action
 - Once triggered, turn on the fan immediately
 
 **Turn OFF Behavior:**
+
 - Wait for ALL thresholds to return to good for 5 minutes continuously
 - If any level exceeds threshold during the 5 minutes, reset the timer
 - Once triggered, turn off the fan immediately
@@ -131,9 +137,11 @@ The turn-on automation should only execute when:
 ### Actions
 
 #### Turn ON
+
 When triggered and conditions are met, enable the air filter for the respective floor.
 
 #### Turn OFF
+
 When triggered and conditions are met, disable the air filter for the respective floor.
 
 ## Dependencies
@@ -145,6 +153,7 @@ A sleep schedule must be defined to determine when fans should not automatically
 **Purpose**: Prevent fans from automatically turning on during sleep hours to avoid noise disturbance
 
 **Requirements:**
+
 - Define sleep hours (e.g., 10 PM to 7 AM)
 - Could be a fixed schedule or use a schedule helper
 - Future enhancement: Could integrate with presence detection or bedtime routines
@@ -158,6 +167,7 @@ Two input boolean helpers must be created to track whether fans are in automatio
 **Purpose**: Distinguish between automation-controlled fans (which auto turn-off) and manually-controlled fans (which don't)
 
 **Requirements:**
+
 - Create `input_boolean.upstairs_filter_auto_mode`
 - Create `input_boolean.basement_filter_auto_mode`
 - Set to `on` when automation turns on the fan
@@ -169,6 +179,7 @@ Two input boolean helpers must be created to track whether fans are in automatio
 Each air filter device already tracks runtime and provides a sensor indicating when the filter needs replacement.
 
 **Requirements:**
+
 - Monitor the filter replacement sensor from each device
 - Create a persistent notification when the sensor indicates filter change is needed
 - Notification should remain until dismissed by user
@@ -229,6 +240,7 @@ The system requires the following automations.
 **Scenario**: User manually turns fan on or off
 
 **Behavior:**
+
 - **Manual turn-on**: Fan remains on and will NOT automatically turn off when air quality improves. Fan only turns off when:
   - Sleep schedule starts (all fans turn off at beginning of sleep hours)
   - User manually turns it off
@@ -242,6 +254,7 @@ The system requires the following automations.
 **Scenario**: Sensor becomes unavailable or reports null/unknown state
 
 **Expected Behavior**:
+
 - If sensor goes offline while fan is OFF: Fan should not turn on (safe default)
 - If sensor goes offline while fan is ON: Fan should not turn off (safe default - keeps filtering)
 
@@ -252,6 +265,7 @@ The system requires the following automations.
 **Scenario**: Sleep schedule starts or ends while automation is waiting or fan is running
 
 **Expected Behavior**:
+
 - **Sleep schedule starts**: All fans should turn off immediately, regardless of air quality
 - **Sleep schedule ends**: Automations resume normal operation; if air quality is poor, fans will turn on after 1 minute
 - If sleep schedule starts while automation is waiting (during 1-minute delay to turn on), the pending action should be cancelled
@@ -261,6 +275,7 @@ The system requires the following automations.
 **Scenario**: Event affecting whole house (cooking, cleaning products, etc.)
 
 **Expected Behavior**: Both floors will turn on their fans independently
+
 - Each floor responds to local conditions
 - No coordination needed
 - Both fans may run simultaneously
@@ -270,6 +285,7 @@ The system requires the following automations.
 **Scenario**: Sensor readings oscillate around threshold value
 
 **Mitigation**:
+
 - 1-minute delay for turn-on prevents brief spikes from triggering fan
 - 5-minute delay for turn-off ensures air quality is stable before stopping filtration
 - Hysteresis naturally handles minor fluctuations
@@ -279,6 +295,7 @@ The system requires the following automations.
 **Scenario**: Fan is already on, and turn-on automation triggers again
 
 **Expected Behavior**: Enabling an already-enabled fan should be harmless (no-op)
+
 - No negative effects
 - Automation remains idempotent
 
@@ -287,6 +304,7 @@ The system requires the following automations.
 **Scenario**: System restarts while fan is running
 
 **Expected Behavior**:
+
 - After restart, automations should evaluate current conditions
 - If air quality is poor, automation should turn fan back on (after 1 minute)
 - If air quality is good and fan is running, automation should turn fan off (after 5 minutes)
@@ -300,6 +318,7 @@ The system requires the following automations.
 **Setup**: Air quality is good, fan is off, no scenes active
 
 **Procedure**:
+
 1. Increase PM2.5 above 2.0 ug/m3 (e.g., by generating particulates near sensor)
 2. Wait 30 seconds - verify fan does NOT turn on
 3. Keep PM2.5 elevated for full 60 seconds
@@ -312,6 +331,7 @@ The system requires the following automations.
 **Setup**: Fan was turned on by automation, air quality becomes good
 
 **Procedure**:
+
 1. Allow automation to turn on fan (via poor air quality)
 2. Improve air quality - ensure all metrics drop below thresholds
 3. Wait 3 minutes - verify fan does NOT turn off
@@ -325,6 +345,7 @@ The system requires the following automations.
 **Setup**: Air quality is good, fan is off
 
 **Procedure**:
+
 1. Increase PM2.5 above 2.0
 2. Wait 30 seconds
 3. Reduce PM2.5 below 2.0 (before 1 minute elapses)
@@ -337,6 +358,7 @@ The system requires the following automations.
 **Setup**: Fan is already running due to poor air quality
 
 **Procedure**:
+
 1. Fan is on (triggered by automation)
 2. Air quality remains poor
 3. Verify automation does not re-trigger
@@ -348,6 +370,7 @@ The system requires the following automations.
 **Setup**: PM2.5 is elevated above 2.0 for more than 1 minute during sleep hours
 
 **Procedure**:
+
 1. Ensure sleep schedule is active
 2. Increase PM2.5 above 2.0
 3. Wait 2 minutes with elevated PM2.5
@@ -359,6 +382,7 @@ The system requires the following automations.
 **Setup**: Fan is running, sleep schedule starts
 
 **Procedure**:
+
 1. Manually turn on fan or trigger via air quality
 2. Wait for sleep schedule to start
 
@@ -369,6 +393,7 @@ The system requires the following automations.
 **Setup**: User manually turns on fan
 
 **Procedure**:
+
 1. Outside of sleep hours, manually turn on fan
 2. Wait for air quality to return to good levels (or ensure it's already good)
 3. Wait 10+ minutes with good air quality
@@ -377,6 +402,7 @@ The system requires the following automations.
 6. Verify fan turns off when sleep schedule starts
 
 **Expected Result**:
+
 - Fan remains on even with good air quality for 10+ minutes
 - Fan does NOT turn off due to good air quality (only sleep schedule turns it off)
 - Fan turns off when sleep schedule starts
@@ -386,6 +412,7 @@ The system requires the following automations.
 **Setup**: Create poor air quality condition on only one floor
 
 **Procedure**:
+
 1. Elevate PM2.5 on upstairs only
 2. Keep basement air quality good
 3. Wait 1+ minutes
@@ -397,6 +424,7 @@ The system requires the following automations.
 **Setup**: Elevate multiple metrics simultaneously, allow automation to turn on fan
 
 **Procedure**:
+
 1. Increase both PM2.5 and VOC Index above thresholds
 2. Wait 1+ minute - verify fan turns on (automation-controlled)
 3. Reduce only PM2.5 below threshold (VOC still elevated)
@@ -407,6 +435,7 @@ The system requires the following automations.
 8. Verify fan turns off
 
 **Expected Result**:
+
 - Fan turns on after 1 minute (when any metric was high)
 - Fan remains on while any metric is elevated
 - Fan remains on for 3 minutes after all metrics drop (hysteresis)
@@ -417,12 +446,14 @@ The system requires the following automations.
 **Setup**: Filter replacement sensor indicates filter needs changing
 
 **Procedure**:
+
 1. Wait for device's filter replacement sensor to trigger (or simulate sensor state change)
 2. Verify persistent notification is created
 3. Dismiss notification
 4. If device supports acknowledgment, verify device filter tracking is reset
 
 **Expected Result**:
+
 - Notification appears when device's filter replacement sensor triggers
 - Notification persists until dismissed
 - Device filter tracking is acknowledged/reset if supported

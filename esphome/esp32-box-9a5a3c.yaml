@@ -1,6 +1,6 @@
 substitutions:
   name: esp32-box-9a5a3c
-  friendly_name: ESP32 Box 
+  friendly_name: ESP32 Box
   loading_illustration_file: https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/loading_320_240.png
   idle_illustration_file: https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/idle_320_240.png
   listening_illustration_file: https://github.com/esphome/wake-word-voice-assistants/raw/main/casita/listening_320_240.png

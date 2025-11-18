@@ -5,7 +5,6 @@ blueprint:
     Creates a persistent notification when an air filter needs to be replaced
     based on the filter's replacement sensor.
   domain: automation
-
   input:
     filter_name:
       name: Filter Name

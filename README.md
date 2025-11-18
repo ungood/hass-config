@@ -1,6 +1,6 @@
 # hass-config
-My Home Assistant configuration
 
+My Home Assistant configuration
 
 ## References
 

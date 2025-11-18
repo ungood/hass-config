@@ -17,7 +17,7 @@ tts/
 www
 zigbee2mqtt/
 
-
 # Generated files
 .pre-commit-config.yaml
 *.backup
+result/

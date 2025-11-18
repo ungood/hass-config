@@ -9,6 +9,7 @@ Help the user quickly capture a feature idea as a GitHub issue.
    - Brief description of what the feature should do
 
 2. Create the issue using `gh issue create`:
+
    ```bash
    gh issue create --title "TITLE" --body "DESCRIPTION" --label "enhancement"
    ```
@@ -16,6 +17,7 @@ Help the user quickly capture a feature idea as a GitHub issue.
 3. Return the issue URL to the user.
 
 Notes:
+
 - Keep it simple and fast
 - Use HEREDOC format for multi-line descriptions
 - Label all issues as "enhancement"

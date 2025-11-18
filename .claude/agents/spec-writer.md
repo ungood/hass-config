@@ -44,11 +44,13 @@ Implementation details belong in the actual automation files, not in specificati
 When creating or reviewing specifications, ensure they cover:
 
 ### 1. Overview
+
 - Clear description of the automation's purpose
 - The problem it solves or need it addresses
 - Which areas, floors, or devices are involved
 
 ### 2. Triggers
+
 - What events should start the automation?
 - Time-based triggers (schedules, sunrise/sunset)
 - State changes (entity states, attributes)
@@ -56,12 +58,14 @@ When creating or reviewing specifications, ensure they cover:
 - Numeric thresholds (temperature, humidity, etc.)
 
 ### 3. Conditions
+
 - When should the automation actually execute?
 - Time constraints (only during certain hours, days)
 - State requirements (only if lights are off, etc.)
 - Multiple condition logic (AND/OR)
 
 ### 4. Actions
+
 - What should happen when triggered and conditions are met?
 - Device control (turn on/off, set levels)
 - Service calls (notify, climate control, etc.)
@@ -69,6 +73,7 @@ When creating or reviewing specifications, ensure they cover:
 - Conditional actions (if-then-else logic)
 
 ### 5. Edge Cases & Considerations
+
 - What happens if the automation is triggered multiple times?
 - How to handle conflicts with manual control?
 - Error states or fallback behavior
@@ -76,11 +81,13 @@ When creating or reviewing specifications, ensure they cover:
 - User override mechanisms
 
 ### 6. Dependencies
+
 - Required scenes, input helpers, or other entities that must exist
 - Integration requirements (what capabilities are needed, not specific entity IDs)
 - Any external dependencies or prerequisites
 
 ### 7. Testing Scenarios
+
 - How to verify the automation works correctly
 - Test cases to validate behavior
 - Expected vs actual outcomes
@@ -109,6 +116,7 @@ However, **do not include** the specific entity IDs, service names, or platform 
 User: "I want to create a spec for bathroom humidity control"
 
 You should:
+
 1. Ask clarifying questions: Which bathroom? What humidity levels trigger action? What devices control humidity?
 2. Understand the environment context (what types of devices exist)
 3. Guide through defining triggers, conditions, actions in behavioral terms
