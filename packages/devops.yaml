@@ -54,15 +54,8 @@ automation:
         at: 04:00:00
 
     actions:
-      - try:
-          - action: update.install
-            target:
-              entity_id: >-
-                {{ states.update | map(attribute='entity_id') |
-                   select('is_state', 'on') | list }}
-        error:
-          # Send failure notification
-          - service: notify.low_priority
-            data:
-              title: "Automatic Updates Failed"
-              message: "Failed to install available updates"
+      - action: update.install
+        target:
+          entity_id: >-
+            {{ states.update | map(attribute='entity_id') |
+               select('is_state', 'on') | list }}
