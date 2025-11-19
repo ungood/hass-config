@@ -3,7 +3,7 @@
 # Handles automatic updates and configuration deployment
 
 shell_command:
-  git_pull: "GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=no git -C /config pull origin main"
+  git_pull: "GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no' git -C /config pull origin main"
 
 automation:
   - id: auto_deploy_config
