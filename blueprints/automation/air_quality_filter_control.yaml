@@ -52,11 +52,11 @@ blueprint:
 
     sleep_schedule:
       name: Sleep Schedule
-      description: Schedule entity that indicates sleep hours
+      description: Binary sensor that indicates sleep hours (on = sleeping)
       selector:
         entity:
-          domain: schedule
-      default: schedule.sleep_schedule
+          domain: binary_sensor
+      default: binary_sensor.sleep_schedule
 
 mode: restart
 max_exceeded: silent

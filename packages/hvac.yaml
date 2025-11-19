@@ -1,0 +1,199 @@
+---
+# HVAC Intelligent Climate Control Package
+# Controls 4 Daikin heat exchanger units with air quality integration,
+# vacation mode, and adaptive scheduling with temperature prediction.
+# See specs/hvac.md for detailed specification
+
+# ============================================================================
+# INPUT HELPERS
+# ============================================================================
+
+input_boolean:
+  hvac_automation_enabled:
+    name: "HVAC Automation Enabled"
+    icon: mdi:hvac
+    initial: false
+
+  vacation_mode:
+    name: "Vacation Mode"
+    icon: mdi:beach
+    initial: false
+
+input_number:
+  hvac_learned_heat_time:
+    name: "HVAC Learned Heat Time"
+    min: 5
+    max: 120
+    step: 1
+    unit_of_measurement: "min"
+    icon: mdi:clock
+    initial: 30
+
+  hvac_learned_cool_time:
+    name: "HVAC Learned Cool Time"
+    min: 5
+    max: 120
+    step: 1
+    unit_of_measurement: "min"
+    icon: mdi:clock
+    initial: 20
+
+# ============================================================================
+# TEMPLATE SENSORS
+# ============================================================================
+# Note: Uses binary_sensor.sleep_schedule from controls.yaml
+# Note: Uses temperature inputs from controls.yaml (sleep, awake, away)
+# Note: Uses sensor.main_floor_aqi from air_quality.yaml
+
+template:
+  - sensor:
+      # Learning: Average Heat Time (placeholder - will be managed by pyscript)
+      - name: "HVAC Learning Heat Time"
+        unique_id: hvac_learning_heat_time
+        icon: mdi:clock
+        unit_of_measurement: "min"
+        state: >
+          {{ states('input_number.hvac_learned_heat_time') | float(30) }}
+
+      # Learning: Average Cool Time (placeholder - will be managed by pyscript)
+      - name: "HVAC Learning Cool Time"
+        unique_id: hvac_learning_cool_time
+        icon: mdi:clock
+        unit_of_measurement: "min"
+        state: >
+          {{ states('input_number.hvac_learned_cool_time') | float(20) }}
+
+# ============================================================================
+# AUTOMATIONS
+# ============================================================================
+
+automation:
+  # Single automation that applies HVAC priority rules when any relevant state changes
+  - alias: "HVAC: Apply Priority on State Changes"
+    id: hvac_apply_priority_on_changes
+    description: "Automatically apply HVAC priority rules when conditions change"
+    triggers:
+      # Priority 1: Air Quality changes
+      - trigger: numeric_state
+        entity_id: sensor.main_floor_aqi
+        above: 99
+        id: aqi_high
+      - trigger: numeric_state
+        entity_id: sensor.main_floor_aqi
+        below: 100
+        id: aqi_normal
+
+      # Priority 2: Vacation Mode changes
+      - trigger: state
+        entity_id: input_boolean.vacation_mode
+        id: vacation_mode
+
+      # Priority 3 & 4: Sleep/Awake schedule
+      - trigger: state
+        entity_id: binary_sensor.sleep_schedule
+        to: "on"
+        id: sleep_start
+      - trigger: state
+        entity_id: binary_sensor.sleep_schedule
+        to: "off"
+        id: awake_start
+
+      # Automation enabled
+      - trigger: state
+        entity_id: input_boolean.hvac_automation_enabled
+        to: "on"
+        id: automation_enabled
+
+      # Temperature settings changed
+      - trigger: state
+        entity_id:
+          - input_number.sleep_temperature
+          - input_number.awake_temperature
+          - input_number.away_temperature
+        id: temperature_changed
+
+    conditions:
+      - condition: state
+        entity_id: input_boolean.hvac_automation_enabled
+        state: "on"
+
+    actions:
+      # Add delay for temperature changes to avoid rapid updates
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: temperature_changed
+            sequence:
+              - delay:
+                  seconds: 2
+        default: []
+
+      # Determine target mode and temperature based on priority rules
+      - choose:
+          # Priority 1: Air Quality - Fan mode when AQI >= 100
+          - conditions:
+              - condition: numeric_state
+                entity_id: sensor.main_floor_aqi
+                above: 99
+            sequence:
+              # Turn on fan mode for units with air filters
+              - action: climate.set_hvac_mode
+                target:
+                  entity_id:
+                    - climate.faikin_living_mqtt_hvac
+                    - climate.faikin_guest_mqtt_hvac
+                data:
+                  hvac_mode: fan
+              # Turn off other units to save energy
+              - action: climate.turn_off
+                target:
+                  entity_id:
+                    - climate.faikin_master_mqtt_hvac
+                    - climate.faikin_basement_mqtt_hvac
+
+          # Priority 2: Vacation Mode - Auto mode at away temperature
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.vacation_mode
+                state: "on"
+            sequence:
+              - action: climate.set_temperature
+                target:
+                  entity_id:
+                    - climate.faikin_living_mqtt_hvac
+                    - climate.faikin_master_mqtt_hvac
+                    - climate.faikin_basement_mqtt_hvac
+                    - climate.faikin_guest_mqtt_hvac
+                data:
+                  hvac_mode: auto
+                  temperature: "{{ states('input_number.away_temperature') | float(70) }}"
+
+          # Priority 3: Sleep Mode - Cool mode at sleep temperature
+          - conditions:
+              - condition: state
+                entity_id: binary_sensor.sleep_schedule
+                state: "on"
+            sequence:
+              - action: climate.set_temperature
+                target:
+                  entity_id:
+                    - climate.faikin_living_mqtt_hvac
+                    - climate.faikin_master_mqtt_hvac
+                    - climate.faikin_basement_mqtt_hvac
+                    - climate.faikin_guest_mqtt_hvac
+                data:
+                  hvac_mode: cool
+                  temperature: "{{ states('input_number.sleep_temperature') | float(68) }}"
+
+        # Priority 4 (Default): Awake Mode - Auto mode at awake temperature
+        default:
+          - action: climate.set_temperature
+            target:
+              entity_id:
+                - climate.faikin_living_mqtt_hvac
+                - climate.faikin_master_mqtt_hvac
+                - climate.faikin_basement_mqtt_hvac
+                - climate.faikin_guest_mqtt_hvac
+            data:
+              hvac_mode: auto
+              temperature: "{{ states('input_number.awake_temperature') | float(72) }}"

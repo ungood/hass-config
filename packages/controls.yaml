@@ -1,0 +1,37 @@
+---
+# Common Control Inputs
+# Shared helpers used across multiple packages
+
+input_number:
+  sleep_temperature:
+    name: "Sleep Temperature"
+    min: 60
+    max: 80
+    step: 1
+    unit_of_measurement: "°F"
+    icon: mdi:thermometer
+    initial: 68
+
+  awake_temperature:
+    name: "Awake Temperature"
+    min: 60
+    max: 80
+    step: 1
+    unit_of_measurement: "°F"
+    icon: mdi:thermometer
+    initial: 71
+
+  away_temperature:
+    name: "Away Temperature"
+    min: 60
+    max: 80
+    step: 1
+    unit_of_measurement: "°F"
+    icon: mdi:thermometer
+    initial: 70
+
+binary_sensor:
+  - platform: tod
+    name: "Sleep Schedule"
+    after: "22:00"
+    before: "07:00"

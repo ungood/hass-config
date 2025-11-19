@@ -3,6 +3,42 @@
 # Controls air filters based on AirGradient sensor readings
 # See specs/air-quality.md for detailed specification
 
+# ============================================================================
+# TEMPLATE SENSORS
+# ============================================================================
+# AQI sensors calculated using EPA standard from PM2.5 readings
+# Uses reusable macro from custom_templates/aqi.jinja
+
+template:
+  - sensor:
+      # Main Floor AQI Calculation from PM2.5 (EPA Standard)
+      - name: "Main Floor AQI"
+        unique_id: main_floor_aqi
+        state_class: measurement
+        icon: mdi:air-filter
+        unit_of_measurement: "AQI"
+        state: >
+          {% from 'aqi.jinja' import pm25_to_aqi %}
+          {{ pm25_to_aqi('sensor.main_floor_air_sensor_pm2_5') }}
+        availability: >
+          {{ states('sensor.main_floor_air_sensor_pm2_5') not in ['unknown', 'unavailable', 'none'] }}
+
+      # Basement AQI Calculation from PM2.5 (EPA Standard)
+      - name: "Basement AQI"
+        unique_id: basement_aqi
+        state_class: measurement
+        icon: mdi:air-filter
+        unit_of_measurement: "AQI"
+        state: >
+          {% from 'aqi.jinja' import pm25_to_aqi %}
+          {{ pm25_to_aqi('sensor.basement_air_sensor_pm2_5') }}
+        availability: >
+          {{ states('sensor.basement_air_sensor_pm2_5') not in ['unknown', 'unavailable', 'none'] }}
+
+# ============================================================================
+# INPUT HELPERS
+# ============================================================================
+
 input_boolean:
   main_floor_filter_auto_mode:
     name: "Main Floor Filter Auto Mode"
@@ -26,7 +62,7 @@ automation:
         voc_sensor: sensor.main_floor_air_sensor_voc_index
         air_filter: fan.main_floor_air_filter
         auto_mode_helper: input_boolean.main_floor_filter_auto_mode
-        sleep_schedule: schedule.sleep_schedule
+        sleep_schedule: binary_sensor.sleep_schedule
 
   # Basement Air Quality Control
   - alias: Basement Air Quality Control
@@ -41,7 +77,7 @@ automation:
         voc_sensor: sensor.basement_air_sensor_voc_index
         air_filter: fan.basement_air_filter
         auto_mode_helper: input_boolean.basement_filter_auto_mode
-        sleep_schedule: schedule.sleep_schedule
+        sleep_schedule: binary_sensor.sleep_schedule
 
   # Turn off all filters at sleep schedule
   - alias: All Air Filters - Turn OFF at Sleep Schedule
@@ -49,7 +85,7 @@ automation:
     description: Turn off all air filters when sleep schedule starts
     triggers:
       - trigger: state
-        entity_id: schedule.sleep_schedule
+        entity_id: binary_sensor.sleep_schedule
         to: "on"
     actions:
       # Turn off both air filters
