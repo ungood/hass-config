@@ -63,3 +63,9 @@ This is a Home Assistant configuration repository that uses:
 - **`esphome/`** - ESPHome device configurations
 - **`pyscript/`** - Python scripts for advanced automations
 - **`themes/`** - Frontend theme definitions (loaded via `!include_dir_merge_named`)
+
+## Configuration Best Practices
+
+### Input Helpers
+
+**IMPORTANT**: Never use the `initial` attribute in input helper configurations (e.g., `input_number`, `input_boolean`, `input_text`, `input_select`, etc.). The `initial` attribute causes values to be reset to their initial state whenever Home Assistant restarts, which results in loss of state and unexpected behavior. Always omit the `initial` attribute to preserve values across restarts.

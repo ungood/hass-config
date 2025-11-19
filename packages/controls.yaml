@@ -6,7 +6,6 @@ input_boolean:
   vacation_mode:
     name: "Vacation Mode"
     icon: mdi:beach
-    initial: false
 
 input_number:
   sleep_temperature:
@@ -16,7 +15,6 @@ input_number:
     step: 1
     unit_of_measurement: "°F"
     icon: mdi:thermometer
-    initial: 68
 
   awake_temperature:
     name: "Awake Temperature"
@@ -25,7 +23,6 @@ input_number:
     step: 1
     unit_of_measurement: "°F"
     icon: mdi:thermometer
-    initial: 71
 
   away_temperature:
     name: "Away Temperature"
@@ -34,7 +31,6 @@ input_number:
     step: 1
     unit_of_measurement: "°F"
     icon: mdi:thermometer
-    initial: 70
 
 binary_sensor:
   - platform: tod

@@ -12,7 +12,6 @@ input_boolean:
   hvac_automation_enabled:
     name: "HVAC Automation Enabled"
     icon: mdi:hvac
-    initial: false
 
 # ============================================================================
 # AUTOMATIONS
