@@ -2,6 +2,12 @@
 # Common Control Inputs
 # Shared helpers used across multiple packages
 
+input_boolean:
+  vacation_mode:
+    name: "Vacation Mode"
+    icon: mdi:beach
+    initial: false
+
 input_number:
   sleep_temperature:
     name: "Sleep Temperature"

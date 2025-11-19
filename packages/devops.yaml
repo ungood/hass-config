@@ -3,7 +3,6 @@
 # Handles automatic updates and configuration deployment
 
 shell_command:
-  # Pull latest changes from git repository
   git_pull: >
     GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=no
     git -C /config pull origin main
