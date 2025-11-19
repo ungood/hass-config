@@ -1,0 +1,7 @@
+---
+# HVAC Control Dashboard Configuration
+mode: yaml
+title: HVAC Control
+icon: mdi:hvac
+show_in_sidebar: true
+filename: lovelace-dashboards/hvac-control.yaml

@@ -19,9 +19,8 @@ input_boolean:
 # ============================================================================
 
 automation:
-  # Single automation that applies HVAC priority rules when any relevant state changes
-  - alias: "HVAC: Apply Priority on State Changes"
-    id: hvac_apply_priority_on_changes
+  - alias: "HVAC Automated Control"
+    id: hvac_automated_control
     description: "Automatically apply HVAC priority rules when conditions change"
     triggers:
       # Priority 1: Air Quality changes
@@ -157,5 +156,3 @@ automation:
               entity_id:
                 - climate.faikin_master_mqtt_hvac
                 - climate.faikin_guest_mqtt_hvac
-
-                
