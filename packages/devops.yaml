@@ -4,7 +4,9 @@
 
 shell_command:
   # Pull latest changes from git repository
-  git_pull: "git /config && git pull"
+  git_pull: >
+    GIT_SSH_COMMAND=ssh -o StrictHostKeyChecking=no
+    git -C /config pull origin main
 
 automation:
   - id: auto_deploy_config
