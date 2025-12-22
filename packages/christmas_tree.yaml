@@ -1,0 +1,37 @@
+---
+# Christmas Tree Automation
+# Automatically turns the Christmas Tree plug off at 11pm and on at 7am
+
+automation:
+  - id: christmas_tree_schedule
+    alias: "Christmas Tree Schedule"
+    description: "Turns Christmas Tree off at night"
+    mode: single
+    
+    triggers:
+      - trigger: time
+        at: "23:00:00"
+        id: turn_off
+        
+      - trigger: time
+        at: "07:00:00"
+        id: turn_on
+    
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: turn_off
+            sequence:
+              - service: switch.turn_off
+                target:
+                  entity_id: switch.christmas_tree
+                  
+          - conditions:
+              - condition: trigger
+                id: turn_on
+            sequence:
+              - service: switch.turn_on
+                target:
+                  entity_id: switch.christmas_tree
+
