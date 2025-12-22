@@ -2,6 +2,18 @@
 
 My Home Assistant configuration
 
+## Authorization
+
+```bash
+cp .env.template .env
+# Modify .env appropriately
+
+direnv allow
+
+# Test the connection (note that hass-cli info hits a deprecated API and therefore doesn't work)
+hass-cli config release
+```
+
 ## References
 
 - [Home Assistant Documentation](https://www.home-assistant.io/)
