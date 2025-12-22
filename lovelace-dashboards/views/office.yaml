@@ -1,0 +1,13 @@
+---
+title: Office
+path: office
+icon: mdi:chair-rolling
+cards:
+  - type: light
+    entity: light.busy_light
+    name:
+      type: device
+    tap_action:
+      action: more-info
+    hold_action:
+      action: toggle

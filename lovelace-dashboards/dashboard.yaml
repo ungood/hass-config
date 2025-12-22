@@ -1,0 +1,6 @@
+---
+title: Dashboard
+views:
+  - !include views/hvac.yaml
+  - !include views/office.yaml
+  - !include views/qtip.yaml

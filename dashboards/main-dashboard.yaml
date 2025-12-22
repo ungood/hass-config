@@ -1,0 +1,8 @@
+---
+# Main Dashboard Configuration
+mode: yaml
+title: Dashboard
+icon: mdi:view-dashboard
+show_in_sidebar: true
+filename: lovelace-dashboards/dashboard.yaml
+

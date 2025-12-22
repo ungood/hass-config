@@ -1,0 +1,66 @@
+---
+title: HVAC
+path: hvac
+icon: mdi:hvac
+cards:
+  # Automation Control
+  - type: entities
+    title: Automation Control
+    entities:
+      - entity: input_boolean.hvac_automation_enabled
+        name: HVAC Automation
+      - entity: input_boolean.vacation_mode
+        name: Vacation Mode
+      - entity: binary_sensor.sleep_schedule
+        name: Sleep Schedule
+
+  # Temperature Settings
+  - type: entities
+    title: Temperature Settings
+    entities:
+      - entity: input_number.sleep_temperature
+        name: Sleep Temperature
+      - entity: input_number.awake_temperature
+        name: Awake Temperature
+      - entity: input_number.away_temperature
+        name: Away Temperature
+
+  # Climate Controls
+  - type: thermostat
+    entity: climate.faikin_living_mqtt_hvac
+    name: Living Room
+
+  - type: thermostat
+    entity: climate.faikin_master_mqtt_hvac
+    name: Master Bedroom
+
+  - type: thermostat
+    entity: climate.faikin_basement_mqtt_hvac
+    name: Basement
+
+  - type: thermostat
+    entity: climate.faikin_guest_mqtt_hvac
+    name: Guest Bedroom
+
+  # Air Quality & Sensors
+  - type: entities
+    title: Air Quality & System Info
+    entities:
+      - entity: sensor.main_floor_aqi
+        name: Main Floor Air Quality
+      - entity: sensor.hvac_learning_heat_time
+        name: Learning Heat Time
+      - entity: sensor.hvac_learning_cool_time
+        name: Learning Cool Time
+      - entity: sensor.basement_hvac_ac_target
+        name: Basement AC Target
+
+  # System Overview
+  - type: entities
+    title: All Climate Controls
+    entities:
+      - entity: climate.faikin_living_mqtt_hvac
+      - entity: climate.faikin_master_mqtt_hvac
+      - entity: climate.faikin_basement_mqtt_hvac
+      - entity: climate.faikin_guest_mqtt_hvac
+

@@ -1,0 +1,115 @@
+---
+title: QTip
+path: qtip
+icon: mdi:lightbulb
+cards:
+  - type: gauge
+    entity: sensor.2025_cadillac_optiq_super_cruise_ev_battery_level
+    min: 0
+    max: 100
+    name: Battery
+    severity:
+      green: 60
+      yellow: 40
+      red: 15
+  - type: gauge
+    entity: sensor.2025_cadillac_optiq_super_cruise_ev_range
+    min: 0
+    name: Range
+    severity:
+      green: 250
+      yellow: 150
+      red: 75
+    max: 330
+  - type: glance
+    entities:
+      - entity: sensor.2025_cadillac_optiq_super_cruise_tire_pressure_left_front
+        name: Left Front
+        icon: mdi:car-tire-alert
+      - entity: sensor.2025_cadillac_optiq_super_cruise_tire_pressure_right_front
+        name: Right Front
+        icon: mdi:car-tire-alert
+      - entity: sensor.2025_cadillac_optiq_super_cruise_tire_pressure_left_rear
+        name: Left Rear
+        icon: mdi:car-tire-alert
+      - entity: sensor.2025_cadillac_optiq_super_cruise_tire_pressure_right_rear
+        name: Right Rear
+        icon: mdi:car-tire-alert
+    columns: 2
+    title: Tires
+  - type: entities
+    title: Mileage
+    entities:
+      - entity: sensor.2025_cadillac_optiq_super_cruise_lifetime_mpge
+      - entity: sensor.2025_cadillac_optiq_super_cruise_lifetime_efficiency
+      - entity: sensor.2025_cadillac_optiq_super_cruise_electric_economy
+    state_color: true
+    footer:
+      type: custom:mini-graph-card
+      entities:
+        - entity: sensor.2025_cadillac_optiq_super_cruise_odometer
+        - entity: sensor.2025_cadillac_optiq_super_cruise_lifetime_energy_used
+          y_axis: secondary
+          show_state: true
+      hours_to_show: 672
+      group_by: date
+      decimals: 0
+      show:
+        graph: bar
+        name: false
+        icon: false
+  - type: entities
+    entities:
+      - entity: binary_sensor.2025_cadillac_optiq_super_cruise_ev_plug_state
+        secondary_info: last-changed
+      - entity: binary_sensor.2025_cadillac_optiq_super_cruise_ev_charge_state
+        secondary_info: last-changed
+      - entity: sensor.2025_cadillac_optiq_super_cruise_ev_plug_voltage
+      - entity: sensor.2025_cadillac_optiq_super_cruise_interm_volt_batt_volt
+      - entity: sensor.2025_cadillac_optiq_super_cruise_charger_power_level
+    title: Charging
+    state_color: true
+  - type: custom:mini-graph-card
+    entities:
+      - entity: sensor.2025_cadillac_optiq_super_cruise_last_trip_total_distance
+      - entity: sensor.2025_cadillac_optiq_super_cruise_last_trip_electric_econ
+        y_axis: secondary
+        show_state: true
+    name: Last Trip
+    hours_to_show: 672
+    group_by: date
+    aggregate_func: null
+    show:
+      graph: bar
+      icon: false
+  - type: custom:mini-graph-card
+    entities:
+      - entity: sensor.2025_cadillac_optiq_super_cruise_ambient_air_temperature
+        name: Ambient
+      - entity: >-
+          sensor.2025_cadillac_optiq_super_cruise_hybrid_battery_minimum_temperature
+        name: Battery
+      - entity: sensor.kewr_daynight_temperature
+        name: Outdoor
+    name: Temperature
+    hours_to_show: 24
+    points_per_hour: 1
+    line_width: 2
+  - type: custom:bubble-card
+    card_type: button
+    event_action:
+      tap_action:
+        action: more-info
+      double_tap_action:
+        action: none
+      hold_action:
+        action: none
+    button_type: slider
+    entity: sensor.2025_cadillac_optiq_super_cruise_ev_battery_level
+    name: Battery Level
+    min_value: 0
+    max_value: 100
+    sub_button: []
+  - type: custom:bubble-card
+    card_type: horizontal-buttons-stack
+
