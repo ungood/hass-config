@@ -9,7 +9,7 @@ CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
 version=$(cat "$CONFIG_DIR/.HA_VERSION")
 
 echo "Checking Home Assistant configuration (version $version)..."
-docker run --rm \
+podman run --rm \
   -v "$CONFIG_DIR":/config \
   ghcr.io/home-assistant/home-assistant:$version \
   python -m homeassistant --script check_config --config /config -i

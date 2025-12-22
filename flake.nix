@@ -55,7 +55,7 @@
               entry = "./scripts/validate-config";
               files = "\\.(yaml|yml)$";
               pass_filenames = false;
-              extraPackages = [ pkgs.docker ];
+              extraPackages = [ pkgs.podman ];
             };
           };
 
@@ -64,7 +64,6 @@
             inherit (config.pre-commit) shellHook;
             packages = config.pre-commit.settings.enabledPackages ++ [
               pkgs.home-assistant-cli
-              pkgs.home-assistant
             ];
           };
         };

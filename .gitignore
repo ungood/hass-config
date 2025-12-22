@@ -21,3 +21,5 @@ zigbee2mqtt/
 .pre-commit-config.yaml
 *.backup
 result/
+
+!.envrc
