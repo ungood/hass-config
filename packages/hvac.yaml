@@ -123,6 +123,9 @@ automation:
                 entity_id: binary_sensor.sleep_schedule
                 state: "on"
             sequence:
+              # Wait 1 hour after sleep schedule starts before turning on sleep HVACs
+              - delay:
+                  hours: 1
               # Turn on bedroom units
               - action: climate.set_temperature
                 target:
