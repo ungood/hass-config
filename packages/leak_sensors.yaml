@@ -1,0 +1,19 @@
+---
+# Leak Detection
+# Detects leaks and sends a warning message when detected.
+
+automation:
+  - id: leak_alert
+    alias: "Leak Alert"
+    discription: "Sends warning notifications when moisture is detected"
+    mode: single
+
+    triggers:
+      - trigger: state
+        entitiy_id: update.bathroom_leak_sensor
+        to: "on"
+    actions:
+      - service: script.send_notification
+        data:
+          title: "Bathroom Water Leak Detected"
+          message: "Leak detected in the bathroom"
