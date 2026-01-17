@@ -19,24 +19,18 @@ automation:
         local_only: false
 
     action:
-      # Start git pull addon
+      - service: notify.all_devices
+        data:
+          title: "Home Assistant Deployment Starting"
+          message: >-
+            Commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
+
+      # Start git pull addon, which is configured to pull latest changes and restart if needed.
       - service: hassio.addon_start
         data:
           addon: core_git_pull
 
-      # Wait for git pull to complete
-      - delay:
-          seconds: 15
-
-      # Reload core configuration to apply changes
-      - service: homeassistant.reload_all
-
-      # Send success notification
-      - service: notify.all_devices
-        data:
-          title: "Configuration Deployment Complete"
-          message: >-
-            Deployed commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
+      
 
   - id: automatic_updates
     alias: "Automatic Updates"
