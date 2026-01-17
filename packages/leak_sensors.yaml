@@ -13,7 +13,7 @@ automation:
         entitiy_id: update.bathroom_leak_sensor
         to: "on"
     actions:
-      - service: script.send_notification
+      - service: notify.all_devices
         data:
           title: "Bathroom Water Leak Detected"
           message: "Leak detected in the bathroom"
