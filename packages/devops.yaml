@@ -19,30 +19,24 @@ automation:
         local_only: false
 
     action:
-      # Pull latest changes
-      - service: shell_command.git_pull
-        response_variable: git_response
+      # Start git pull addon
+      - service: hassio.addon_start
+        data:
+          addon: core_git_pull
 
-      # Check if git pull succeeded
-      - if: "{{ git_response['returncode'] == 0 }}"
-        then:
-          # Reload core configuration to apply changes
-          - service: homeassistant.reload_all
+      # Wait for git pull to complete
+      - delay:
+          seconds: 15
 
-          # Send success notification
-          - service: notify.all_devices
-            data:
-              title: "Configuration Deployment Complete"
-              message: >-
-                Deployed commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
-        else:
-          # Send failure notification
-          - service: notify.all_devices
-            data:
-              title: "Configuration Deployment Failed"
-              message: >-
-                Failed to deploy commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
-                Error: {{ git_response['stderr'] }}
+      # Reload core configuration to apply changes
+      - service: homeassistant.reload_all
+
+      # Send success notification
+      - service: notify.all_devices
+        data:
+          title: "Configuration Deployment Complete"
+          message: >-
+            Deployed commit {{ trigger.json.commit[:7] }}: {{ trigger.json.message }}
 
   - id: automatic_updates
     alias: "Automatic Updates"
