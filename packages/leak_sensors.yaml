@@ -9,16 +9,25 @@ automation:
     mode: parallel
 
     triggers:
-      - trigger: state
-        entity_id: binary_sensor.*_leak_sensor_water_leak
-        to: "on"
+      - trigger: template
+        value_template: >
+          {{ states.binary_sensor
+             | selectattr('entity_id', 'search', '_leak_sensor_water_leak')
+             | selectattr('state', 'eq', 'on')
+             | list | count > 0 }}
 
     variables:
+      triggered_sensor: >
+        {{ states.binary_sensor
+           | selectattr('entity_id', 'search', '_leak_sensor_water_leak')
+           | selectattr('state', 'eq', 'on')
+           | map(attribute='entity_id')
+           | list | first | default('unknown') }}
       location: >
-        {% if '_leak_sensor' in trigger.entity_id %}
-        {{ trigger.entity_id.split('.')[1].split('_leak_sensor')[0] | replace('_', ' ') | title }}
+        {% if '_leak_sensor' in triggered_sensor %}
+        {{ triggered_sensor.split('.')[1].split('_leak_sensor')[0] | replace('_', ' ') | title }}
         {% else %}
-        'Unknown'
+        Unknown
         {% endif %}
 
     actions:
@@ -38,15 +47,25 @@ automation:
     mode: parallel
 
     triggers:
-      - trigger: state
-        entity_id: binary_sensor.*_leak_sensor_battery_low
+      - trigger: template
+        value_template: >
+          {{ states.binary_sensor
+             | selectattr('entity_id', 'search', '_leak_sensor_battery_low')
+             | selectattr('state', 'eq', 'on')
+             | list | count > 0 }}
 
     variables:
+      triggered_sensor: >
+        {{ states.binary_sensor
+           | selectattr('entity_id', 'search', '_leak_sensor_battery_low')
+           | selectattr('state', 'eq', 'on')
+           | map(attribute='entity_id')
+           | list | first | default('unknown') }}
       location: >
-        {% if '_leak_sensor' in trigger.entity_id %}
-        {{ trigger.entity_id.split('.')[1].split('_leak_sensor')[0] | replace('_', ' ') | title }}
+        {% if '_leak_sensor' in triggered_sensor %}
+        {{ triggered_sensor.split('.')[1].split('_leak_sensor')[0] | replace('_', ' ') | title }}
         {% else %}
-        'Unknown'
+        Unknown
         {% endif %}
 
     actions:
