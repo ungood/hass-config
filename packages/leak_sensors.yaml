@@ -6,14 +6,37 @@ automation:
   - id: leak_alert
     alias: "Leak Alert"
     description: "Sends warning notifications when moisture is detected"
-    mode: single
+    mode: parallel
 
     triggers:
       - trigger: state
-        entity_id: binary_sensor.bathroom_leak_sensor_water_leak
+        entity_id:
+          - binary_sensor.basement_leak_sensor_water_leak
+          - binary_sensor.bathroom_leak_sensor_water_leak
+          - binary_sensor.fridge_leak_sensor_water_leak
+          - binary_sensor.kitchen_leak_sensor_water_leak
         to: "on"
+
+    variables:
+      sensors:
+        binary_sensor.basement_leak_sensor_water_leak:
+          location: "Basement"
+        binary_sensor.bathroom_leak_sensor_water_leak:
+          location: "Guest Bathroom"
+        binary_sensor.fridge_leak_sensor_water_leak:
+          location: "Kitchen"
+        binary_sensor.kitchen_leak_sensor_water_leak:
+          location: "Kitchen"
+      sensor_config: "{{ sensors.get(trigger.entity_id, {}) }}"
+      location: "{{ sensor_config.get('location', 'Unknown') }}"
+
     actions:
       - service: notify.all_devices
         data:
-          title: "Bathroom Water Leak Detected"
-          message: "Leak detected in the bathroom"
+          title: "Water Leak Detected ({{ location }})!"
+          message: >
+            {% if location == 'Unknown' %}
+            A leak was detected in an unkown location!
+            {% else %}
+            A leak in the {{ location }} was detected!
+            {% endif %}
