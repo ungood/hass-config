@@ -10,7 +10,7 @@ automation:
 
     triggers:
       - trigger: state
-        entity_id: update.bathroom_leak_sensor
+        entity_id: binary_sensor.bathroom_leak_sensor_water_leak
         to: "on"
     actions:
       - service: notify.all_devices
