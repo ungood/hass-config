@@ -10,25 +10,16 @@ automation:
 
     triggers:
       - trigger: state
-        entity_id:
-          - binary_sensor.basement_leak_sensor_water_leak
-          - binary_sensor.bathroom_leak_sensor_water_leak
-          - binary_sensor.fridge_leak_sensor_water_leak
-          - binary_sensor.kitchen_leak_sensor_water_leak
+        entity_id: binary_sensor.*_leak_sensor_water_leak
         to: "on"
 
     variables:
-      sensors:
-        binary_sensor.basement_leak_sensor_water_leak:
-          location: "Basement"
-        binary_sensor.bathroom_leak_sensor_water_leak:
-          location: "Guest Bathroom"
-        binary_sensor.fridge_leak_sensor_water_leak:
-          location: "Kitchen"
-        binary_sensor.kitchen_leak_sensor_water_leak:
-          location: "Kitchen"
-      sensor_config: "{{ sensors.get(trigger.entity_id, {}) }}"
-      location: "{{ sensor_config.get('location', 'Unknown') }}"
+      location: >
+        {% if '_leak_sensor' in trigger.entity_id %}
+        {{ trigger.entity_id.split('.')[1].split('_leak_sensor')[0] | replace('_', ' ') | title }}
+        {% else %}
+        'Unknown'
+        {% endif %}
 
     actions:
       - service: notify.all_devices
@@ -39,4 +30,32 @@ automation:
             A leak was detected in an unkown location!
             {% else %}
             A leak in the {{ location }} was detected!
+            {% endif %}
+
+  - id: leak_battery
+    alias: "Leak Sensor Battery Alert"
+    description: "Sends an alert when leak sensors are low on battery"
+    mode: parallel
+
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.*_leak_sensor_battery_low
+
+    variables:
+      location: >
+        {% if '_leak_sensor' in trigger.entity_id %}
+        {{ trigger.entity_id.split('.')[1].split('_leak_sensor')[0] | replace('_', ' ') | title }}
+        {% else %}
+        'Unknown'
+        {% endif %}
+
+    actions:
+      - service: notify.all_devices
+        data:
+          title: "{{ location }} Leak Detector Reports Low Battery"
+          message: >
+            {% if location == 'Unknown' %}
+            A leak detector is reporting low battery; please see Home Assistant for more details
+            {% else %}
+            The {{ location }} leak detector is reporting low battery. Due to this, future incidents from {{ location }} may fail to be reported
             {% endif %}
