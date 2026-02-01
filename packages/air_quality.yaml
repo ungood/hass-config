@@ -36,6 +36,29 @@ template:
           {{ states('sensor.basement_air_sensor_pm2_5') not in ['unknown', 'unavailable', 'none'] }}
 
 # ============================================================================
+# STATISTICS SENSORS (for AQI trend tracking)
+# ============================================================================
+
+sensor:
+  - platform: statistics
+    name: "Main Floor AQI Trend"
+    unique_id: main_floor_aqi_trend
+    entity_id: sensor.main_floor_aqi
+    state_characteristic: change_second
+    sampling_size: 10
+    max_age:
+      minutes: 5
+
+  - platform: statistics
+    name: "Basement AQI Trend"
+    unique_id: basement_aqi_trend
+    entity_id: sensor.basement_aqi
+    state_characteristic: change_second
+    sampling_size: 10
+    max_age:
+      minutes: 5
+
+# ============================================================================
 # INPUT HELPERS
 # ============================================================================
 
@@ -122,3 +145,31 @@ automation:
         filter_name: Basement Air Filter
         replace_filter_sensor: binary_sensor.basement_air_filter_replace_filter
         filter_age_sensor: sensor.basement_air_filter_filter_age
+
+  # Main Floor Air Quality Warning
+  - alias: Main Floor Air Warning
+    id: main_floor_air_warning
+    description: Notify when main floor is experiencing bad air quality AND the air quality is trending upwards or will not be resolved soon
+    use_blueprint:
+      path: air_quality_warning.yaml
+      input:
+        floor_name: Main Floor
+        aqi_sensor: sensor.main_floor_aqi
+        aqi_trend_sensor: sensor.main_floor_aqi_trend
+        bad_aqi_threshold: 50
+        target_aqi: 30
+        resolve_time: 15
+
+  # Basement Air Quality Warning
+  - alias: Basement Air Warning
+    id: basement_air_warning
+    description: Notify when basement is experiencing bad air quality AND the air quality is trending upwards or will not be resolved soon
+    use_blueprint:
+      path: air_quality_warning.yaml
+      input:
+        floor_name: Basement
+        aqi_sensor: sensor.basement_aqi
+        aqi_trend_sensor: sensor.basement_aqi_trend
+        bad_aqi_threshold: 50
+        target_aqi: 30
+        resolve_time: 15
