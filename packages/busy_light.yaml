@@ -31,6 +31,10 @@ automation:
       - trigger: time
         at: "21:00:00"
         id: pre_sleep
+      # Periodic check every 5 minutes (workaround for slow calendar polling)
+      - trigger: time_pattern
+        minutes: "/5"
+        id: periodic_check
       # Also trigger on Home Assistant start to sync state
       - trigger: homeassistant
         event: start
@@ -45,6 +49,8 @@ automation:
                     id: calendar_busy
                   - condition: trigger
                     id: calendar_event_change
+                  - condition: trigger
+                    id: periodic_check
                   - condition: and
                     conditions:
                       - condition: trigger
