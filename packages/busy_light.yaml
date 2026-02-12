@@ -17,6 +17,11 @@ automation:
         entity_id: calendar.maintainx
         to: "off"
         id: calendar_free
+      # Trigger when calendar attributes change (for back-to-back events)
+      - trigger: state
+        entity_id: calendar.maintainx
+        attribute: message
+        id: calendar_event_change
       # Trigger when sleep schedule starts
       - trigger: state
         entity_id: binary_sensor.sleep_schedule
@@ -38,6 +43,8 @@ automation:
                 conditions:
                   - condition: trigger
                     id: calendar_busy
+                  - condition: trigger
+                    id: calendar_event_change
                   - condition: and
                     conditions:
                       - condition: trigger
@@ -45,6 +52,10 @@ automation:
                       - condition: state
                         entity_id: calendar.maintainx
                         state: "on"
+              # Only turn on if calendar is currently busy (handles event changes)
+              - condition: state
+                entity_id: calendar.maintainx
+                state: "on"
               # Don't turn on if sleeping
               - condition: state
                 entity_id: binary_sensor.sleep_schedule
