@@ -1,0 +1,98 @@
+---
+# Busy Light Management Feature
+# Controls busy light based on work calendar status
+
+automation:
+  # Control busy light based on calendar status
+  - alias: Busy Light - Calendar Status Control
+    id: busy_light_calendar_control
+    description: Turn on busy light with random color when calendar shows busy, turn off when free or sleeping
+    triggers:
+      # Trigger when calendar state changes
+      - trigger: state
+        entity_id: calendar.maintainx
+        to: "on"
+        id: calendar_busy
+      - trigger: state
+        entity_id: calendar.maintainx
+        to: "off"
+        id: calendar_free
+      # Trigger when sleep schedule starts
+      - trigger: state
+        entity_id: binary_sensor.sleep_schedule
+        to: "on"
+        id: sleep_start
+      # Trigger 1 hour before sleep time (21:00, since sleep is at 22:00)
+      - trigger: time
+        at: "21:00:00"
+        id: pre_sleep
+      # Also trigger on Home Assistant start to sync state
+      - trigger: homeassistant
+        event: start
+        id: ha_start
+    actions:
+      - choose:
+          # When calendar is busy (has an active event) and not sleeping/pre-sleep
+          - conditions:
+              - condition: or
+                conditions:
+                  - condition: trigger
+                    id: calendar_busy
+                  - condition: and
+                    conditions:
+                      - condition: trigger
+                        id: ha_start
+                      - condition: state
+                        entity_id: calendar.maintainx
+                        state: "on"
+              # Don't turn on if sleeping
+              - condition: state
+                entity_id: binary_sensor.sleep_schedule
+                state: "off"
+              # Don't turn on if within 1 hour before sleep
+              - condition: template
+                value_template: >
+                  {% set sleep_attr = state_attr('binary_sensor.sleep_schedule', 'after') %}
+                  {% if sleep_attr %}
+                    {% set sleep_time = as_datetime(sleep_attr) %}
+                    {% set current_time = now() %}
+                    {% set one_hour_before = sleep_time - timedelta(hours=1) %}
+                    {{ current_time < one_hour_before or current_time >= sleep_time }}
+                  {% else %}
+                    true
+                  {% endif %}
+            sequence:
+              - action: light.turn_on
+                target:
+                  entity_id: light.busy_light
+                data:
+                  brightness_pct: 20
+                  hs_color:
+                    - "{{ range(0, 360) | random }}"
+                    - 100
+          # When calendar is free, sleeping, or pre-sleep time
+          - conditions:
+              - condition: or
+                conditions:
+                  - condition: trigger
+                    id: calendar_free
+                  - condition: trigger
+                    id: sleep_start
+                  - condition: trigger
+                    id: pre_sleep
+                  - condition: and
+                    conditions:
+                      - condition: trigger
+                        id: ha_start
+                      - condition: or
+                        conditions:
+                          - condition: state
+                            entity_id: calendar.maintainx
+                            state: "off"
+                          - condition: state
+                            entity_id: binary_sensor.sleep_schedule
+                            state: "on"
+            sequence:
+              - action: light.turn_off
+                target:
+                  entity_id: light.busy_light
