@@ -1,10 +1,10 @@
 ---
 blueprint:
-  name: Air Quality Warning
+  name: High CO2 Warning
   description: >
-    Notifies when air quality is bad and won't resolve within the specified time.
-    Alerts immediately if AQI is worsening, or if the current improvement rate
-    won't bring AQI to acceptable levels in time.
+    Notifies when CO2 levels are high and require manual intervention (opening windows).
+    Alerts immediately if CO2 is rising, or if the current improvement rate
+    won't bring CO2 to acceptable levels in time.
   domain: automation
   input:
     floor_name:
@@ -14,41 +14,41 @@ blueprint:
         text:
       default: Floor
 
-    aqi_sensor:
-      name: AQI Sensor
-      description: Sensor that reports AQI level
+    co2_sensor:
+      name: CO2 Sensor
+      description: Sensor that reports CO2 level in ppm
       selector:
         entity:
           domain: sensor
 
-    aqi_trend_sensor:
-      name: AQI Trend Sensor
-      description: Statistics sensor tracking AQI rate of change per second
+    co2_trend_sensor:
+      name: CO2 Trend Sensor
+      description: Statistics sensor tracking CO2 rate of change per second
       selector:
         entity:
           domain: sensor
 
-    bad_aqi_threshold:
-      name: Bad AQI Threshold
-      description: AQI level considered bad
+    high_co2_threshold:
+      name: High CO2 Threshold
+      description: CO2 level (ppm) considered high and requiring action
       selector:
         number:
-          min: 10
-          max: 500
-      default: 50
+          min: 400
+          max: 5000
+      default: 1000
 
-    target_aqi:
-      name: Target AQI
-      description: AQI level considered acceptable
+    target_co2:
+      name: Target CO2
+      description: CO2 level (ppm) considered acceptable
       selector:
         number:
-          min: 0
-          max: 100
-      default: 30
+          min: 400
+          max: 1500
+      default: 800
 
     resolve_time:
       name: Resolution Time (minutes)
-      description: Max time to wait for AQI to resolve before alerting
+      description: Max time to wait for CO2 to resolve before alerting
       selector:
         number:
           min: 1
@@ -60,28 +60,28 @@ max_exceeded: silent
 
 variables:
   floor_name: !input floor_name
-  aqi_sensor: !input aqi_sensor
-  aqi_trend_sensor: !input aqi_trend_sensor
-  bad_aqi_threshold: !input bad_aqi_threshold
-  target_aqi: !input target_aqi
+  co2_sensor: !input co2_sensor
+  co2_trend_sensor: !input co2_trend_sensor
+  high_co2_threshold: !input high_co2_threshold
+  target_co2: !input target_co2
   resolve_time: !input resolve_time
-  current_aqi: "{{ states(aqi_sensor) | float(0) }}"
-  trend: "{{ states(aqi_trend_sensor) | float(0) }}"
+  current_co2: "{{ states(co2_sensor) | float(0) }}"
+  trend: "{{ states(co2_trend_sensor) | float(0) }}"
   # Calculate minutes to resolve (if improving)
   # trend is change per second, so multiply by 60 for per-minute
   minutes_to_resolve: >
     {% if trend >= 0 %}
       999
     {% else %}
-      {{ ((current_aqi - target_aqi) / (trend | abs * 60)) | round(1) }}
+      {{ ((current_co2 - target_co2) / (trend | abs * 60)) | round(1) }}
     {% endif %}
   is_worsening: "{{ trend >= 0 }}"
   wont_resolve_in_time: "{{ minutes_to_resolve > resolve_time }}"
 
 triggers:
   - trigger: numeric_state
-    entity_id: !input aqi_sensor
-    above: !input bad_aqi_threshold
+    entity_id: !input co2_sensor
+    above: !input high_co2_threshold
     for:
       minutes: 1
 
@@ -92,10 +92,10 @@ conditions:
 actions:
   - service: notify.all_devices
     data:
-      title: "{{ floor_name }} Air Quality Warning"
+      title: "{{ floor_name }} High CO2 Warning"
       message: >
         {% if is_worsening %}
-        AQI is {{ current_aqi | int }} and getting worse.
+        CO2 is {{ current_co2 | int }} ppm and rising. Open a window!
         {% else %}
-        AQI is {{ current_aqi | int }} and won't reach acceptable levels for ~{{ minutes_to_resolve | int }} minutes.
+        CO2 is {{ current_co2 | int }} ppm and won't reach acceptable levels for ~{{ minutes_to_resolve | int }} minutes. Consider opening a window.
         {% endif %}
