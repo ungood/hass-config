@@ -3,10 +3,22 @@
 # Controls busy light based on work calendar status
 
 automation:
+  # Refresh calendar data every 5 minutes (default remote_calendar polling is 24h)
+  - alias: Busy Light - Calendar Refresh
+    id: busy_light_calendar_refresh
+    description: Force refresh of MaintainX calendar to keep busy light responsive
+    triggers:
+      - trigger: time_pattern
+        minutes: "/5"
+    actions:
+      - action: homeassistant.update_entity
+        target:
+          entity_id: calendar.maintainx
+
   # Control busy light based on calendar status
   - alias: Busy Light - Calendar Status Control
     id: busy_light_calendar_control
-    description: Turn on busy light with random color when calendar shows busy, turn off when free or sleeping
+    description: Turn on busy light and cycle hue when calendar shows busy, turn off when free or sleeping
     triggers:
       # Trigger when calendar state changes
       - trigger: state
@@ -31,9 +43,9 @@ automation:
       - trigger: time
         at: "21:00:00"
         id: pre_sleep
-      # Periodic check every 5 minutes (workaround for slow calendar polling)
+      # Periodic check every minute to cycle color and sync state
       - trigger: time_pattern
-        minutes: "/5"
+        minutes: "/1"
         id: periodic_check
       # Also trigger on Home Assistant start to sync state
       - trigger: homeassistant
@@ -85,7 +97,9 @@ automation:
                 data:
                   brightness_pct: 20
                   hs_color:
-                    - "{{ range(0, 360) | random }}"
+                    - >-
+                      {% set current = state_attr('light.busy_light', 'hs_color') %}
+                      {{ ((current[0] | float(0)) + 6) % 360 if current else range(0, 360) | random }}
                     - 100
           # When calendar is free, sleeping, or pre-sleep time
           - conditions:
