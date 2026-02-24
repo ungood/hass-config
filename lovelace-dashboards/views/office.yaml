@@ -3,6 +3,7 @@ title: Office
 path: office
 icon: mdi:chair-rolling
 cards:
+  # Busy Light
   - type: light
     entity: light.busy_light
     name:
@@ -11,3 +12,87 @@ cards:
       action: more-info
     hold_action:
       action: toggle
+
+  # Calendar - Day View
+  - type: calendar
+    initial_view: dayGridDay
+    entities:
+      - calendar.maintainx
+
+  # Standing Desk
+  - type: glance
+    title: Standing Desk
+    entities:
+      - entity: sensor.feather_standing_desk_height
+        name: Height
+        icon: mdi:human-male-height-variant
+      - entity: binary_sensor.feather_standing_desk_sitting
+        name: Sitting
+        icon: mdi:seat
+      - entity: sensor.feather_standing_desk_sitting_time
+        name: Sitting Time
+        icon: mdi:timer-outline
+    columns: 3
+
+  - type: entities
+    title: Desk Positions
+    entities:
+      - entity: button.feather_standing_desk_position_1
+        name: Position 1
+        icon: mdi:numeric-1-box
+      - entity: button.feather_standing_desk_position_2
+        name: Position 2
+        icon: mdi:numeric-2-box
+      - entity: button.feather_standing_desk_position_3
+        name: Position 3
+        icon: mdi:numeric-3-box
+      - entity: button.feather_standing_desk_position_4
+        name: Position 4
+        icon: mdi:numeric-4-box
+      - entity: button.feather_standing_desk_stop
+        name: Stop
+        icon: mdi:stop
+
+  # Air Quality
+  - type: gauge
+    entity: sensor.main_floor_aqi
+    name: Air Quality Index
+    min: 0
+    max: 300
+    severity:
+      green: 0
+      yellow: 51
+      red: 101
+
+  - type: custom:mini-graph-card
+    entities:
+      - entity: sensor.main_floor_air_sensor_carbon_dioxide
+        name: CO2
+    name: CO2 Level
+    hours_to_show: 24
+    points_per_hour: 2
+    line_width: 2
+    show:
+      icon: false
+
+  - type: glance
+    title: Air Quality Details
+    entities:
+      - entity: sensor.main_floor_air_sensor_pm2_5
+        name: PM2.5
+      - entity: sensor.main_floor_air_sensor_voc_index
+        name: VOC
+      - entity: sensor.main_floor_air_sensor_temperature
+        name: Temp
+      - entity: sensor.main_floor_air_sensor_humidity
+        name: Humidity
+    columns: 4
+
+  - type: entities
+    title: Air Filter
+    entities:
+      - entity: fan.main_floor_air_filter
+        name: Air Filter
+      - entity: input_boolean.main_floor_filter_auto_mode
+        name: Auto Mode
+    state_color: true
