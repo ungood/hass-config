@@ -34,11 +34,11 @@ automation:
 
   - id: automatic_updates
     alias: "Automatic Updates"
-    description: "Automatically install available updates daily at 4 AM"
+    description: "Automatically install available updates daily at 10 PM"
 
     triggers:
       - trigger: time
-        at: 04:00:00
+        at: "22:00:00"
 
     actions:
       - action: update.install
