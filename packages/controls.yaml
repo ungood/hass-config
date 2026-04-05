@@ -35,5 +35,5 @@ input_number:
 binary_sensor:
   - platform: tod
     name: "Sleep Schedule"
-    after: "22:00"
+    after: "22:30"
     before: "07:00"

@@ -59,9 +59,9 @@ The system operates based on **strict priority rules** (higher priorities always
 **Trigger**: Current time within sleep hours AND vacation mode OFF AND AQI < 100
 
 **Action**:
-- All units set to **Cool mode** at sleep temperature (default 68°F)
+- Bedroom units (Master Bedroom and Guest Bedroom) set to **Cool mode** at sleep temperature (default 68°F)
+- Other units (Living Room and Basement) turned off to save energy
 - Pre-starts based on learned temperature adjustment time
-- Applies to all 4 units uniformly
 
 ### Priority 4: Awake Mode (DEFAULT)
 **Trigger**: Current time within awake hours AND vacation mode OFF AND AQI < 100
