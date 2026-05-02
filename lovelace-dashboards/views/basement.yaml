@@ -63,7 +63,7 @@ cards:
     title: This Month's Usage (kWh)
     columns: 4
     entities:
-      - entity: sensor.jaydens_computer_energy_total
+      - entity: sensor.jayden_s_computer_energy_total
         name: Total
       - entity: sensor.jaydens_computer_energy_meter_peak
         name: Peak
@@ -75,18 +75,8 @@ cards:
   - type: entities
     title: This Month's Cost
     entities:
-      - entity: sensor.jaydens_computer_energy_cost
+      - entity: sensor.jayden_s_computer_energy_cost
         name: Total Cost
-
-  - type: entities
-    title: TOU Rates
-    entities:
-      - entity: input_number.electricity_rate_peak
-        name: Peak (5pm–9pm)
-      - entity: input_number.electricity_rate_mid_peak
-        name: Mid-Peak (6am–5pm, 9pm–12am)
-      - entity: input_number.electricity_rate_off_peak
-        name: Off-Peak (12am–6am)
 
   - type: statistics-graph
     title: Daily Energy Use (Last 30 Days)
