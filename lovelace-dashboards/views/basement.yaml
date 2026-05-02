@@ -1,0 +1,116 @@
+---
+title: Basement
+path: basement
+icon: mdi:home-floor-b
+cards:
+  # Air Quality
+  - type: gauge
+    entity: sensor.basement_aqi
+    name: Air Quality Index
+    min: 0
+    max: 300
+    severity:
+      green: 0
+      yellow: 51
+      red: 101
+
+  - type: custom:mini-graph-card
+    entities:
+      - entity: sensor.basement_air_sensor_carbon_dioxide
+        name: CO2
+    name: CO2 Level
+    hours_to_show: 24
+    points_per_hour: 2
+    line_width: 2
+    show:
+      icon: false
+
+  - type: glance
+    title: Air Quality Details
+    entities:
+      - entity: sensor.basement_air_sensor_pm2_5
+        name: PM2.5
+      - entity: sensor.basement_air_sensor_voc_index
+        name: VOC
+      - entity: sensor.basement_air_sensor_temperature
+        name: Temp
+      - entity: sensor.basement_air_sensor_humidity
+        name: Humidity
+    columns: 4
+
+  - type: entities
+    title: Air Filter
+    entities:
+      - entity: fan.basement_air_filter
+        name: Air Filter
+      - entity: input_boolean.basement_filter_auto_mode
+        name: Auto Mode
+    state_color: true
+
+  # Jayden's Computer
+  - type: entities
+    title: Jayden's Computer
+    state_color: true
+    entities:
+      - entity: switch.jaydens_computer
+        name: Power
+      - entity: sensor.jaydens_computer_power
+        name: Current Power
+      - entity: select.jaydens_computer_energy_meter
+        name: Active Tariff
+
+  - type: glance
+    title: This Month's Usage (kWh)
+    columns: 4
+    entities:
+      - entity: sensor.jaydens_computer_energy_total
+        name: Total
+      - entity: sensor.jaydens_computer_energy_meter_peak
+        name: Peak
+      - entity: sensor.jaydens_computer_energy_meter_mid_peak
+        name: Mid-Peak
+      - entity: sensor.jaydens_computer_energy_meter_off_peak
+        name: Off-Peak
+
+  - type: entities
+    title: This Month's Cost
+    entities:
+      - entity: sensor.jaydens_computer_energy_cost
+        name: Total Cost
+
+  - type: entities
+    title: TOU Rates
+    entities:
+      - entity: input_number.electricity_rate_peak
+        name: Peak (5pm–9pm)
+      - entity: input_number.electricity_rate_mid_peak
+        name: Mid-Peak (6am–5pm, 9pm–12am)
+      - entity: input_number.electricity_rate_off_peak
+        name: Off-Peak (12am–6am)
+
+  - type: statistics-graph
+    title: Daily Energy Use (Last 30 Days)
+    entities:
+      - sensor.jaydens_computer_energy
+    days_to_show: 30
+    period: day
+    stat_types:
+      - change
+    chart_type: bar
+
+  # HVAC
+  - type: thermostat
+    entity: climate.faikin_basement_mqtt_hvac
+    name: Basement HVAC
+
+  # Laundry Leak Sensor
+  - type: entities
+    title: Laundry Leak Sensor
+    state_color: true
+    entities:
+      - entity: binary_sensor.basement_leak_sensor_water_leak
+        name: Water Leak
+      - entity: binary_sensor.basement_leak_sensor_battery_low
+        name: Battery Low
+      - entity: sensor.basement_leak_sensor_battery
+        name: Battery Level
