@@ -1,0 +1,149 @@
+---
+# Energy Cost Tracking
+# Tracks per-device energy usage with time-of-use (TOU) tariffs.
+#
+# TOU schedule (local time):
+#   off_peak: 00:00–06:00  ($0.0805/kWh)
+#   mid_peak: 06:00–17:00  ($0.1409/kWh)
+#   peak:     17:00–21:00  ($0.1610/kWh)
+#   mid_peak: 21:00–24:00  ($0.1409/kWh)
+
+input_number:
+  electricity_rate_peak:
+    name: "Electricity Rate - Peak"
+    min: 0.0
+    max: 2.0
+    step: 0.0001
+    unit_of_measurement: "USD/kWh"
+    icon: mdi:cash
+
+  electricity_rate_mid_peak:
+    name: "Electricity Rate - Mid-Peak"
+    min: 0.0
+    max: 2.0
+    step: 0.0001
+    unit_of_measurement: "USD/kWh"
+    icon: mdi:cash
+
+  electricity_rate_off_peak:
+    name: "Electricity Rate - Off-Peak"
+    min: 0.0
+    max: 2.0
+    step: 0.0001
+    unit_of_measurement: "USD/kWh"
+    icon: mdi:cash
+
+utility_meter:
+  jaydens_computer_energy_meter:
+    name: "Jayden's Computer Energy Meter"
+    source: sensor.jaydens_computer_energy
+    cycle: monthly
+    tariffs:
+      - peak
+      - mid_peak
+      - off_peak
+
+template:
+  - sensor:
+      - name: "Jayden's Computer Energy Cost"
+        unique_id: jaydens_computer_energy_cost
+        unit_of_measurement: "USD"
+        state_class: total
+        icon: mdi:cash
+        state: >
+          {% set peak_rate = states('input_number.electricity_rate_peak') | float(0) %}
+          {% set mid_rate  = states('input_number.electricity_rate_mid_peak') | float(0) %}
+          {% set off_rate  = states('input_number.electricity_rate_off_peak') | float(0) %}
+          {% set peak_kwh = states('sensor.jaydens_computer_energy_meter_peak') | float(0) %}
+          {% set mid_kwh  = states('sensor.jaydens_computer_energy_meter_mid_peak') | float(0) %}
+          {% set off_kwh  = states('sensor.jaydens_computer_energy_meter_off_peak') | float(0) %}
+          {{ (peak_kwh * peak_rate + mid_kwh * mid_rate + off_kwh * off_rate) | round(2) }}
+        availability: >
+          {{ states('sensor.jaydens_computer_energy_meter_peak') not in ['unknown', 'unavailable', 'none']
+             and states('sensor.jaydens_computer_energy_meter_mid_peak') not in ['unknown', 'unavailable', 'none']
+             and states('sensor.jaydens_computer_energy_meter_off_peak') not in ['unknown', 'unavailable', 'none'] }}
+
+      - name: "Jayden's Computer Energy Total"
+        unique_id: jaydens_computer_energy_total
+        unit_of_measurement: "kWh"
+        device_class: energy
+        state_class: total
+        icon: mdi:flash
+        state: >
+          {% set peak_kwh = states('sensor.jaydens_computer_energy_meter_peak') | float(0) %}
+          {% set mid_kwh  = states('sensor.jaydens_computer_energy_meter_mid_peak') | float(0) %}
+          {% set off_kwh  = states('sensor.jaydens_computer_energy_meter_off_peak') | float(0) %}
+          {{ (peak_kwh + mid_kwh + off_kwh) | round(2) }}
+        availability: >
+          {{ states('sensor.jaydens_computer_energy_meter_peak') not in ['unknown', 'unavailable', 'none']
+             and states('sensor.jaydens_computer_energy_meter_mid_peak') not in ['unknown', 'unavailable', 'none']
+             and states('sensor.jaydens_computer_energy_meter_off_peak') not in ['unknown', 'unavailable', 'none'] }}
+
+automation:
+  - id: set_default_electricity_rates
+    alias: "Set Default Electricity Rates"
+    description: "Initialize TOU rates to defaults if unset"
+    triggers:
+      - trigger: homeassistant
+        event: start
+    actions:
+      - if:
+          - condition: numeric_state
+            entity_id: input_number.electricity_rate_peak
+            below: 0.0001
+        then:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.electricity_rate_peak
+            data:
+              value: 0.1610
+      - if:
+          - condition: numeric_state
+            entity_id: input_number.electricity_rate_mid_peak
+            below: 0.0001
+        then:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.electricity_rate_mid_peak
+            data:
+              value: 0.1409
+      - if:
+          - condition: numeric_state
+            entity_id: input_number.electricity_rate_off_peak
+            below: 0.0001
+        then:
+          - action: input_number.set_value
+            target:
+              entity_id: input_number.electricity_rate_off_peak
+            data:
+              value: 0.0805
+
+  - id: electricity_tariff_schedule
+    alias: "Switch Electricity Tariff"
+    description: "Switch utility meter tariff based on time of day"
+    mode: single
+    triggers:
+      - trigger: time
+        at: "00:00:00"
+      - trigger: time
+        at: "06:00:00"
+      - trigger: time
+        at: "17:00:00"
+      - trigger: time
+        at: "21:00:00"
+      - trigger: homeassistant
+        event: start
+    actions:
+      - variables:
+          tariff: >
+            {% set h = now().hour %}
+            {% if h < 6 %}off_peak
+            {% elif h < 17 %}mid_peak
+            {% elif h < 21 %}peak
+            {% else %}mid_peak
+            {% endif %}
+      - action: select.select_option
+        target:
+          entity_id: select.jaydens_computer_energy_meter
+        data:
+          option: "{{ tariff | trim }}"

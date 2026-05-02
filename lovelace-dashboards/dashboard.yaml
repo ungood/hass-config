@@ -3,4 +3,5 @@ title: Dashboard
 views:
   - !include views/hvac.yaml
   - !include views/office.yaml
+  - !include views/basement.yaml
   - !include views/qtip.yaml
