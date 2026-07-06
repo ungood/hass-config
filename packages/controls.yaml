@@ -37,3 +37,7 @@ binary_sensor:
     name: "Sleep Schedule"
     after: "22:30"
     before: "07:00"
+  - platform: tod
+    name: "Sleep Temperature Active"
+    after: "23:30"
+    before: "06:00"
