@@ -7,8 +7,14 @@ cards:
   - type: entities
     title: Automation Control
     entities:
-      - entity: input_boolean.hvac_automation_enabled
-        name: HVAC Automation
+      - entity: input_boolean.living_room_hvac_automation
+        name: Living Room Automation
+      - entity: input_boolean.master_hvac_automation
+        name: Master Bedroom Automation
+      - entity: input_boolean.basement_hvac_automation
+        name: Basement Automation
+      - entity: input_boolean.guest_hvac_automation
+        name: Guest Bedroom Automation
       - entity: input_boolean.vacation_mode
         name: Vacation Mode
       - entity: binary_sensor.sleep_schedule
@@ -42,19 +48,6 @@ cards:
     entity: climate.faikin_guest_mqtt_hvac
     name: Guest Bedroom
 
-  # Air Quality & Sensors
-  - type: entities
-    title: Air Quality & System Info
-    entities:
-      - entity: sensor.main_floor_aqi
-        name: Main Floor Air Quality
-      - entity: sensor.hvac_learning_heat_time
-        name: Learning Heat Time
-      - entity: sensor.hvac_learning_cool_time
-        name: Learning Cool Time
-      - entity: sensor.basement_hvac_ac_target
-        name: Basement AC Target
-
   # System Overview
   - type: entities
     title: All Climate Controls
@@ -63,4 +56,3 @@ cards:
       - entity: climate.faikin_master_mqtt_hvac
       - entity: climate.faikin_basement_mqtt_hvac
       - entity: climate.faikin_guest_mqtt_hvac
-
